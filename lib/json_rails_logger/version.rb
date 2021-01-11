@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
 module JsonRailsLogger
-  VERSION = '1.0.0'
+  MAJOR = 0
+  MINOR = 1
+  FIX = 0
+  VERSION = "#{MAJOR}.#{MINOR}.#{FIX}"
 end
