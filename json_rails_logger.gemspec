@@ -13,4 +13,8 @@ Gem::Specification.new do |s|
   s.files       = ['./lib/json_rails_logger.rb']
   s.homepage    = 'https://github.com/epimorphics/json-rails-logger'
   s.license     = 'MIT'
+
+  s.add_runtime_dependency 'json'
+  s.add_runtime_dependency 'lograge'
+  s.add_runtime_dependency 'railties'
 end
