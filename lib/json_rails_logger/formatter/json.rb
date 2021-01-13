@@ -6,11 +6,15 @@ module JsonRailsLogger
     class Json < ::Logger::Formatter
       def call(severity, timestamp, _progname, raw_msg)
         msg = normalize_message(raw_msg)
-        payload = { level: severity, timestamp: format_datetime(timestamp), environment: ::Rails.env }
 
-        payload.merge!(message: msg)
+        payload = {
+          level: severity,
+          timestamp: format_datetime(timestamp),
+          environment: ::Rails.env,
+          message: msg
+        }
 
-        payload.to_json << "\n"
+        "#{payload.to_json}\n"
       end
 
       private
