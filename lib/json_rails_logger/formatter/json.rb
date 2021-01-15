@@ -10,7 +10,7 @@ module JsonRailsLogger
         payload = {
           level: args[:severity],
           timestamp: args[:timestamp],
-          environment: ::Rails.env,
+          rails_environment: ::Rails.env,
           message: args[:msg]
         }
 
