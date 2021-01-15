@@ -58,6 +58,36 @@ module JsonRailsLogger
       rescue JSON::ParserError
         raw_msg
       end
+
+      def status_message(msg)
+        status = msg.split(' ')[1]
+        { status: status } if msg.match(/Status [0-9]+/)
+      end
+
+      def get_message(msg)
+        splitted_msg = msg.split(' ')
+        method = splitted_msg[0]
+        path = splitted_msg[1]
+
+        unless msg.split(' ').length == 2 && msg.split(' ')[0]&.match('GET')
+          return nil
+        end
+
+        { method: method, path: path }
+      end
+
+      def user_agent_message(msg)
+        splitted_msg = msg.split("\n")
+        user_agent = splitted_msg[0]&.split('"')&.at(1)
+        accept = splitted_msg[1]&.split('"')&.at(1)
+
+        unless msg.split(' ')[0]&.match('User-Agent:') &&
+               splitted_msg[1]&.split(' ')&.at(0)&.match('Accept:')
+          return nil
+        end
+
+        { user_agent: user_agent, accept: accept }
+      end
     end
   end
 end
