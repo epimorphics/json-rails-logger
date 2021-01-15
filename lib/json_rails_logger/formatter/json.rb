@@ -48,7 +48,7 @@ module JsonRailsLogger
         status_message(msg) ||
           get_message(msg) ||
           user_agent_message(msg) ||
-          msg
+          msg.strip
       end
 
       def normalize_message(raw_msg)
