@@ -31,6 +31,26 @@ module JsonRailsLogger
           msg: new_msg
         }
       end
+
+      def process_severity(severity)
+        severity.is_a?(String) && severity.match('FATAL') ? 'ERROR' : severity
+      end
+
+      def process_timestamp(timestamp)
+        format_datetime(timestamp)
+      end
+
+      def process_message(raw_msg)
+        msg = normalize_message(raw_msg)
+
+        return msg unless msg.is_a?(String)
+
+        status_message(msg) ||
+          get_message(msg) ||
+          user_agent_message(msg) ||
+          msg
+      end
+
       def normalize_message(raw_msg)
         return raw_msg unless raw_msg.is_a?(String)
 
