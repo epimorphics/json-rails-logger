@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'logger'
+require 'json'
+require 'rails'
+
 module JsonRailsLogger
   module Formatter
     # This class is the json formatter for our logger
