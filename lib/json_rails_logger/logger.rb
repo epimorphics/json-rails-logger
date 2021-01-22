@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'logger'
-
 module JsonRailsLogger
   # The custom logger class that sets up our formatter
   class Logger < ::Logger

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
+require 'logger'
+require 'json'
+require 'rails'
 require 'lograge'
+
 require './lib/json_rails_logger/railtie' if defined?(Rails)
 
 require './lib/json_rails_logger/error.rb'

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'rails'
-require 'lograge'
-
 module JsonRailsLogger
   # This class is used to configure and setup lograge, as well as our gem
   class Railtie < Rails::Railtie
