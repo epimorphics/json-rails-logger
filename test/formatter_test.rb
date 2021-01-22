@@ -4,53 +4,79 @@ require 'minitest/autorun'
 
 require './lib/json_rails_logger.rb'
 
-describe 'formatter' do
-  describe 'json' do
-    before do
-      @json_formatter = JsonRailsLogger::JsonFormatter.new
-      @json_formatter.datetime_format = '%Y-%m-%d %H:%M:%S'
-      @time = DateTime.parse('2020-12-15T20:15:21')
-      @progname = 'progname'
-    end
+describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLength
+  let(:fixture) do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%d %H:%M:%S'
+    formatter
+  end
 
-    it 'should replace FATAL with ERROR for severity' do
-      output = JSON.parse(@json_formatter.call('FATAL', @time, @progname,
-                                               '[Webpacker] Compilation error!'))
-      _(output['level']).must_equal('ERROR')
-    end
+  let(:timestamp) { DateTime.parse('2020-12-15T20:15:21') }
+  let(:progname) { 'progname' }
 
-    it 'should parse status messages to json' do
-      output = JSON.parse(@json_formatter.call('INFO', @time, @progname, 'Status 200'))
-      _(output['status']).must_equal('200')
-    end
+  it 'should replace FATAL with ERROR for severity' do
+    message = '[Webpacker] Compilation error!'
 
-    it 'should parse method and path for requests' do
-      output = JSON.parse(@json_formatter.call('INFO', @time, @progname, 'GET http://fsa-rp-test.epimorphics.net/'))
-      _(output['method']).must_equal('GET')
-      _(output['path']).must_equal('http://fsa-rp-test.epimorphics.net/')
-    end
+    log_output = fixture.call('FATAL', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
 
-    it 'should parse user agent messages' do
-      output = JSON.parse(@json_formatter.call('INFO', @time, @progname,
-                                               "User-Agent: \"Faraday v1.3.0\"\nAccept: \"application/json\""))
-      _(output['user_agent']).must_equal('Faraday v1.3.0')
-      _(output['accept']).must_equal('application/json')
-    end
+    json_output = JSON.parse(log_output)
+    _(json_output['level']).must_equal('ERROR')
+  end
 
-    it 'should correctly format the timestamp' do
-      output = JSON.parse(@json_formatter.call('INFO', @time, @progname,
-                                               "[Webpacker] Everything's up-to-date. Nothing to do"))
-      _(output['timestamp']).must_equal('2020-12-15 20:15:21')
-    end
+  it 'should parse status messages to json' do
+    message = 'Status 200'
 
-    it 'should move json to top level if message is json object' do
-      json_object = {
-        method: 'GET',
-        path: 'http://fsa-rp-test.epimorphics.net/'
-      }
-      output = JSON.parse(@json_formatter.call('INFO', @time, @progname, json_object))
-      _(output['method']).must_equal('GET')
-      _(output['path']).must_equal('http://fsa-rp-test.epimorphics.net/')
-    end
+    log_output = fixture.call('INFO', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['status']).must_equal('200')
+  end
+
+  it 'should parse method and path for requests' do
+    message = 'GET http://fsa-rp-test.epimorphics.net/'
+
+    log_output = fixture.call('INFO', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['method']).must_equal('GET')
+    _(json_output['path']).must_equal('http://fsa-rp-test.epimorphics.net/')
+  end
+
+  it 'should parse user agent messages' do
+    message = "User-Agent: \"Faraday v1.3.0\"\nAccept: \"application/json\""
+
+    log_output = fixture.call('INFO', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['user_agent']).must_equal('Faraday v1.3.0')
+    _(json_output['accept']).must_equal('application/json')
+  end
+
+  it 'should correctly format the timestamp' do
+    message = "[Webpacker] Everything's up-to-date. Nothing to do"
+
+    log_output = fixture.call('INFO', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['timestamp']).must_equal('2020-12-15 20:15:21')
+  end
+
+  it 'should move json to top level if message is json object' do
+    json_fixture = {
+      method: 'GET',
+      path: 'http://fsa-rp-test.epimorphics.net/'
+    }
+
+    log_output = fixture.call('INFO', timestamp, progname, json_fixture)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['method']).must_equal('GET')
+    _(json_output['path']).must_equal('http://fsa-rp-test.epimorphics.net/')
   end
 end
