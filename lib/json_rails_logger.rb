@@ -5,13 +5,12 @@ require 'json'
 require 'rails'
 require 'lograge'
 
-require './lib/json_rails_logger/railtie' if defined?(Rails)
+require_relative 'json_rails_logger/railtie' if defined?(Rails)
 
-require './lib/json_rails_logger/error.rb'
-require './lib/json_rails_logger/logger.rb'
-require './lib/json_rails_logger/version.rb'
-
-require './lib/json_rails_logger/formatter/json.rb'
+require_relative 'json_rails_logger/json_formatter.rb'
+require_relative 'json_rails_logger/error.rb'
+require_relative 'json_rails_logger/logger.rb'
+require_relative 'json_rails_logger/version.rb'
 
 # A custom rails logger that outputs json instead of raw text
 module JsonRailsLogger

@@ -2,12 +2,12 @@
 
 require 'minitest/autorun'
 
-require './lib/json_rails_logger/formatter/json.rb'
+require './lib/json_rails_logger.rb'
 
 describe 'formatter' do
   describe 'json' do
     before do
-      @json_formatter = JsonRailsLogger::Formatter::Json.new
+      @json_formatter = JsonRailsLogger::JsonFormatter.new
       @json_formatter.datetime_format = '%Y-%m-%d %H:%M:%S'
       @time = DateTime.parse('2020-12-15T20:15:21')
       @progname = 'progname'
