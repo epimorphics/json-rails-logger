@@ -15,10 +15,10 @@ require_relative 'json_rails_logger/version.rb'
 # A custom rails logger that outputs json instead of raw text
 module JsonRailsLogger
   def self.setup(app)
-    unless enabled?(app)
-      raise JsonRailsLogger::LoggerSetupError,
-            'Please configure rails logger to use JsonRailsLogger'
-    end
+    return if enabled?(app)
+
+    raise JsonRailsLogger::LoggerSetupError,
+          'Please configure rails logger to use JsonRailsLogger'
   end
 
   def self.enabled?(app)
