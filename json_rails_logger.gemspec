@@ -17,4 +17,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'lograge'
   s.add_runtime_dependency 'railties'
+
+  s.add_development_dependency 'rake'
 end
