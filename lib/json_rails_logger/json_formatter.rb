@@ -75,7 +75,7 @@ module JsonRailsLogger
 
     def user_agent_message?(msg)
       msg.is_a?(String) &&
-        msg.match(/User-Agent: .+Accept: .+/)
+        msg.match(/User-Agent: .+Accept: .+/m)
     end
 
     def user_agent_message(msg)
