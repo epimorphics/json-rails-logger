@@ -15,7 +15,7 @@ module JsonRailsLogger
           rails_environment: ::Rails.env
         }
 
-        payload.merge!(msg.is_a?(String) ? { message: msg } : msg)
+        payload.merge!(msg)
 
         "#{payload.to_json}\n"
       end
@@ -23,7 +23,7 @@ module JsonRailsLogger
       private
 
       def process_severity(severity)
-        severity.is_a?(String) && severity.match('FATAL') ? 'ERROR' : severity
+        { 'FATAL' => 'ERROR' }[severity] || severity
       end
 
       def process_timestamp(timestamp)
@@ -39,7 +39,7 @@ module JsonRailsLogger
         return get_message(msg) if get_message?(msg)
         return user_agent_message(msg) if user_agent_message?(msg)
 
-        msg.strip
+        { message: msg.strip }
       end
 
       def normalize_message(raw_msg)
