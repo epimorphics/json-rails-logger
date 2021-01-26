@@ -8,11 +8,10 @@ module JsonRailsLogger
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
 
-      payload = {
-        level: sev,
-        timestamp: timestp,
-        rails_environment: ::Rails.env
-      }
+      payload = { level: sev,
+                  timestamp: timestp,
+                  rails_environment: ::Rails.env,
+                  request_id: Thread.current[JsonRailsLogger::REQUEST_ID] }
 
       payload.merge!(msg)
 
