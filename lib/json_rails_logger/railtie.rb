@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'request_id_middleware'
+
 module JsonRailsLogger
   # This class is used to configure and setup lograge, as well as our gem
   class Railtie < Rails::Railtie
@@ -14,6 +16,11 @@ module JsonRailsLogger
     config.after_initialize do |app|
       JsonRailsLogger.setup(app) if JsonRailsLogger.enabled?(app)
       Lograge.setup(app) if JsonRailsLogger.enabled?(app)
+    end
+
+    initializer 'railtie.configure_rails_initialization' do |app|
+      app.middleware.insert_after(ActionDispatch::RequestId,
+                                  JsonRailsLogger::RequestIdMiddleware)
     end
   end
 end
