@@ -5,7 +5,7 @@ require_relative 'constants'
 module JsonRailsLogger
   # Middleware that saves the request_id into a constant
   # and clears it after usage in the formatter
-  class Middleware
+  class RequestIdMiddleware
     def initialize(app)
       @app = app
     end
