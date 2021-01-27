@@ -12,7 +12,7 @@ module JsonRailsLogger
                   timestamp: timestp,
                   rails_environment: ::Rails.env }
 
-      parload.merge!(x_request_id.to_h)
+      payload.merge!(x_request_id.to_h)
       payload.merge!(msg.to_h)
 
       "#{payload.to_json}\n"
