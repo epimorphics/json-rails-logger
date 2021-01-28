@@ -3,6 +3,10 @@
 module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter
+    COMMON_KEYS = %w[
+      method path status duration
+    ].freeze
+
     def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
