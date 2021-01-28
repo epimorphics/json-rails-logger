@@ -11,13 +11,13 @@ module JsonRailsLogger
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
+      new_msg = format_message(msg)
 
       payload = { level: sev,
-                  timestamp: timestp,
-                  rails_environment: ::Rails.env }
+                  timestamp: timestp }
 
       payload.merge!(x_request_id.to_h)
-      payload.merge!(msg.to_h)
+      payload.merge!(new_msg.to_h)
 
       "#{payload.to_json}\n"
     end
@@ -47,6 +47,24 @@ module JsonRailsLogger
       return user_agent_message(msg) if user_agent_message?(msg)
 
       { message: msg.strip }
+    end
+
+    def format_message(msg)
+      new_msg = { rails: { environment: ::Rails.env } }
+
+      return msg.merge(new_msg) if msg.is_a?(Hash) &&
+                                   msg.length == 1 &&
+                                   msg.fetch(:message, nil).is_a?(String)
+
+      is_key_common = ->(k, _v) { COMMON_KEYS.include?(k) }
+
+      common_keys = msg.select(&is_key_common)
+      uncommon_keys = msg.reject(&is_key_common)
+
+      new_msg.merge!(common_keys)
+      new_msg[:rails].merge!(uncommon_keys)
+
+      new_msg
     end
 
     def normalize_message(raw_msg)
