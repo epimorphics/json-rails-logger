@@ -52,9 +52,7 @@ module JsonRailsLogger
     def format_message(msg)
       new_msg = { rails: { environment: ::Rails.env } }
 
-      return msg.merge(new_msg) if msg.is_a?(Hash) &&
-                                   msg.length == 1 &&
-                                   msg.fetch(:message, nil).is_a?(String)
+      return msg.merge(new_msg) if string_message_field?(msg)
 
       split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k) }.map(&:to_h)
 
@@ -64,7 +62,10 @@ module JsonRailsLogger
       new_msg
     end
 
-      new_msg
+    def string_message_field?(msg)
+      msg.is_a?(Hash) &&
+        msg.length == 1 &&
+        msg.fetch(:message, nil).is_a?(String)
     end
 
     def normalize_message(raw_msg)
