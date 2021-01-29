@@ -54,7 +54,8 @@ module JsonRailsLogger
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
-      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k) }.map(&:to_h)
+      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }
+                     .map(&:to_h)
 
       new_msg.merge!(split_msg[0])
       new_msg[:rails].merge!(split_msg[1])
