@@ -56,13 +56,13 @@ module JsonRailsLogger
                                    msg.length == 1 &&
                                    msg.fetch(:message, nil).is_a?(String)
 
-      is_key_common = ->(k, _v) { COMMON_KEYS.include?(k) }
+      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k) }.map(&:to_h)
 
-      common_keys = msg.select(&is_key_common)
-      uncommon_keys = msg.reject(&is_key_common)
+      new_msg.merge!(split_msg[0])
+      new_msg[:rails].merge!(split_msg[1])
 
-      new_msg.merge!(common_keys)
-      new_msg[:rails].merge!(uncommon_keys)
+      new_msg
+    end
 
       new_msg
     end
