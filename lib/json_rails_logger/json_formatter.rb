@@ -3,17 +3,21 @@
 module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter
+    COMMON_KEYS = %w[
+      method path status duration
+    ].freeze
+
     def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
+      new_msg = format_message(msg)
 
       payload = { level: sev,
-                  timestamp: timestp,
-                  rails_environment: ::Rails.env }
+                  timestamp: timestp }
 
       payload.merge!(x_request_id.to_h)
-      payload.merge!(msg.to_h)
+      payload.merge!(new_msg.to_h)
 
       "#{payload.to_json}\n"
     end
@@ -43,6 +47,26 @@ module JsonRailsLogger
       return user_agent_message(msg) if user_agent_message?(msg)
 
       { message: msg.strip }
+    end
+
+    def format_message(msg)
+      new_msg = { rails: { environment: ::Rails.env } }
+
+      return msg.merge(new_msg) if string_message_field?(msg)
+
+      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }
+                     .map(&:to_h)
+
+      new_msg.merge!(split_msg[0])
+      new_msg[:rails].merge!(split_msg[1])
+
+      new_msg
+    end
+
+    def string_message_field?(msg)
+      msg.is_a?(Hash) &&
+        msg.length == 1 &&
+        msg.fetch(:message, nil).is_a?(String)
     end
 
     def normalize_message(raw_msg)
