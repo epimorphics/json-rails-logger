@@ -16,7 +16,7 @@ module JsonRailsLogger
       payload = { level: sev,
                   timestamp: timestp }
 
-      payload.merge!(x_request_id.to_h)
+      payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h)
 
       "#{payload.to_json}\n"
@@ -32,9 +32,9 @@ module JsonRailsLogger
       format_datetime(timestamp)
     end
 
-    def x_request_id
-      x_request_id = Thread.current[JsonRailsLogger::REQUEST_ID]
-      { 'x-request-id': x_request_id } if x_request_id
+    def request_id
+      request_id = Thread.current[JsonRailsLogger::REQUEST_ID]
+      { 'request_id': request_id } if request_id
     end
 
     def process_message(raw_msg)
