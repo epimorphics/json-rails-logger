@@ -79,4 +79,17 @@ describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLeng
     _(json_output['method']).must_equal('GET')
     _(json_output['path']).must_equal('http://fsa-rp-test.epimorphics.net/')
   end
+
+  it 'should correctly add the request id to returning json' do
+    message = "[Webpacker] Everything's up-to-date. Nothing to do"
+    request_id_fixture = { 'request_id' => 'example-8a3fb0-request-30dgh0e-id' }
+
+    fixture.stub :request_id, request_id_fixture do
+      log_output = fixture.call('INFO', timestamp, progname, message)
+      _(log_output).must_be_kind_of(String)
+
+      json_output = JSON.parse(log_output)
+      _(json_output['request_id']).must_equal(request_id_fixture['request_id'])
+    end
+  end
 end
