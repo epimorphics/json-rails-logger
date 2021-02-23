@@ -1,5 +1,10 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.2.1 - 2021-02-23 (Bogdan)
+
+- Unit tests should now autorun on push and pull_request actions
+- 'x-request-id' renamed to 'request_id' in code and returning JSON
+
 ## 0.2.0 - 2021-02-01 (Bogdan)
 
 - Platform related fields are now grouped together inside the 'rails' field
