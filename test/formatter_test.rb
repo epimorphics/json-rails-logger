@@ -7,7 +7,7 @@ require './lib/json_rails_logger.rb'
 describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLength
   let(:fixture) do
     formatter = JsonRailsLogger::JsonFormatter.new
-    formatter.datetime_format = '%Y-%m-%d %H:%M:%S'
+    formatter.datetime_format = '%Y-%m-%d %H:%M:%S.%3N %Z'
     formatter
   end
 
