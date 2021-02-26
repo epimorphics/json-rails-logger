@@ -11,7 +11,7 @@ describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLeng
     formatter
   end
 
-  let(:timestamp) { DateTime.parse('2020-12-15T20:15:21') }
+  let(:timestamp) { DateTime.parse('2020-12-15T20:15:21.286+00:00') }
   let(:progname) { 'progname' }
 
   it 'should replace FATAL with ERROR for severity' do
