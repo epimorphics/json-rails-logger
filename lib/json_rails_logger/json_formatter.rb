@@ -14,7 +14,7 @@ module JsonRailsLogger
       new_msg = format_message(msg)
 
       payload = { level: sev,
-                  timestamp: timestp }
+                  ts: timestp }
 
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h)
