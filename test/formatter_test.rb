@@ -63,7 +63,7 @@ describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLeng
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['timestamp']).must_equal('2020-12-15 20:15:21')
+    _(json_output['ts']).must_equal('2020-12-15 20:15:21.286 +00:00')
   end
 
   it 'should move json to top level if message is json object' do
