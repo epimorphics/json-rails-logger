@@ -9,7 +9,7 @@ module JsonRailsLogger
     # binmode: false, shift_period_suffix: '%Y%m%d'
     def initialize(*args)
       @formatter = JsonRailsLogger::JsonFormatter.new
-      @formatter.datetime_format = '%Y-%m-%d %H:%M:%S.%3N %Z'
+      @formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
       super(*args, formatter: @formatter)
     end
