@@ -7,11 +7,11 @@ require './lib/json_rails_logger.rb'
 describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLength
   let(:fixture) do
     formatter = JsonRailsLogger::JsonFormatter.new
-    formatter.datetime_format = '%Y-%m-%d %H:%M:%S.%3N %Z'
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     formatter
   end
 
-  let(:timestamp) { DateTime.parse('2020-12-15T20:15:21.286+00:00') }
+  let(:timestamp) { DateTime.parse('2020-12-15 20:15:21.286') }
   let(:progname) { 'progname' }
 
   it 'should replace FATAL with ERROR for severity' do
@@ -63,7 +63,7 @@ describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLeng
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['ts']).must_equal('2020-12-15 20:15:21.286 +00:00')
+    _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
   end
 
   it 'should move json to top level if message is json object' do
