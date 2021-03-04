@@ -11,7 +11,7 @@ module JsonRailsLogger
     end
 
     def call(env)
-      request_id = env['action_dispatch.request_id']
+      request_id = env['HTTP_X_REQUEST_ID']
       Thread.current[JsonRailsLogger::REQUEST_ID] = request_id
       @app.call(env)
     ensure
