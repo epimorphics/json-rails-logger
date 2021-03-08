@@ -1,5 +1,10 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.2.2 - 2021-03-02 (Bogdan)
+
+- `request_id` is no longer internally generated if the header is missing from
+  the request, but the field will be missing from the returning JSON instead
+
 ## 0.2.1 - 2021-02-23 (Bogdan)
 
 - Unit tests should now autorun on push and pull_request actions
