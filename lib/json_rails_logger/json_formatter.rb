@@ -29,7 +29,7 @@ module JsonRailsLogger
     end
 
     def process_timestamp(timestamp)
-      format_datetime(timestamp)
+      format_datetime(timestamp.utc)
     end
 
     def request_id
