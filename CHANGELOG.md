@@ -4,6 +4,8 @@
 
 - `timestamp` renamed to `ts` in returning JSON
 - Date format for timestamp changed to `%Y-%m-%dT%H:%M:%S.%3NZ`
+- `request_id` is no longer internally generated if the header is missing from
+  the request, but the field will be missing from the returning JSON instead
 
 ## 0.2.1 - 2021-02-23 (Bogdan)
 
