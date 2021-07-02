@@ -1,5 +1,9 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.0 - 2021-07-02
+
+- (Ian) Fix for GH-25: required files were not listed in the gemspec
+
 ## 0.2.2 - 2021-03-02 (Bogdan)
 
 - `timestamp` renamed to `ts` in returning JSON
