@@ -1,7 +1,9 @@
 name: Publish to GPR
 on:
   workflow_dispatch: {}
-  push: {}
+  push:
+    branches:
+      - main
 
 #---- Below this line should not require editing ----
 jobs:
