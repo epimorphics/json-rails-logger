@@ -1,0 +1,27 @@
+name: Publish to GPR
+on:
+  workflow_dispatch: {}
+  push: {}
+
+#---- Below this line should not require editing ----
+jobs:
+  publish:
+    name: "Publish: ECR Image Upload"
+    runs-on: ubuntu-20.04
+    outputs:
+      image: ${{ steps.mapper.outputs.image }}
+      tag: ${{ steps.gitinfo.outputs.tag }}
+      target: ${{ steps.mapper.outputs.target }}
+
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Publish image"
+      if: steps.mapper.outputs.image != ''
+      env:
+        IMAGE: ${{ steps.mapper.outputs.image }}
+        TAG: ${{ steps.gitinfo.outputs.tag }}
+      shell: bash
+      run: |
+        PAT=${{ secrets.EPI_GPR_ACCESS_TOKEN }} make publish
