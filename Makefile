@@ -14,9 +14,9 @@ all: publish
 
 ${AUTH}:
 	@mkdir -p ${HOME}/.gem
-	@echo '---' > $@
-	@echo ':github: Bearer ${PAT}' >> $@
-	@chmod 0600 $@
+	@echo '---' > ${AUTH}
+	@echo ':github: Bearer ${PAT}' >> ${AUTH}
+	@chmod 0600 ${AUTH}
 
 ${GEM}: ${SPEC} ./lib/json_rails_logger/version.rb
 	gem build ${SPEC}
