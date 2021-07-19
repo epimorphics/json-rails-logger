@@ -23,6 +23,6 @@ module JsonRailsLogger
 
   def self.enabled?(app)
     !app.config.logger.nil? &&
-      app.config.logger.class == JsonRailsLogger::Logger
+      app.config.logger.instance_of?(JsonRailsLogger::Logger)
   end
 end
