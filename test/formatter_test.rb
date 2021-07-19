@@ -2,7 +2,7 @@
 
 require 'minitest/autorun'
 
-require './lib/json_rails_logger.rb'
+require './lib/json_rails_logger'
 
 describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLength
   let(:fixture) do
