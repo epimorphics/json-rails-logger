@@ -8,8 +8,12 @@ Rails app using the installation steps below.
 
 ## Installation
 
-In your Rails app, add this to your gemfile:\
-`gem 'json_rails_logger', git: 'git@github.com:epimorphics/json-rails-logger.git'`
+In your Rails app, add this to your Gemfile:
+```
+source "https://rubygems.pkg.github.com/epimorphics" do
+  gem 'json_rails_logger'
+end
+```
 
 And this to your environment config:\
 `config.logger = JsonRailsLogger::Logger.new(STDOUT)`
@@ -23,3 +27,7 @@ After cloning the repo, first execute:\
 
 To run the tests, use:\
 `rake test`
+
+or to do both:\
+
+`make test`
