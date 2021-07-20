@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json_rails_logger (0.3.0)
+    json_rails_logger (0.3.1)
       json
       lograge
       railties
@@ -44,10 +44,8 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
-    mini_portile2 (2.5.3)
     minitest (5.14.4)
-    nokogiri (1.11.7)
-      mini_portile2 (~> 2.5.0)
+    nokogiri (1.11.7-x86_64-darwin)
       racc (~> 1.4)
     racc (1.5.2)
     rack (2.2.3)
