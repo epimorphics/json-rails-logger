@@ -4,6 +4,7 @@
 ## 0.3.1 - 2021-07-20 (Bogdan)
 
 - Updated dependencies
+- Fixed rubocop warnings
 
 ## 0.3.0 - 2021-07-02
 
