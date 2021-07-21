@@ -20,6 +20,8 @@ Gem::Specification.new do |s|
   end
   s.require_paths = ['lib']
 
+  s.required_ruby_version = '>= 2.6'
+
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'lograge'
   s.add_runtime_dependency 'railties'

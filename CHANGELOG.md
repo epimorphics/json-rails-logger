@@ -1,5 +1,11 @@
 # Changelog for the JSON Rails Logger gem
 
+
+## 0.3.1 - 2021-07-20 (Bogdan)
+
+- Updated dependencies
+- Fixed rubocop warnings
+
 ## 0.3.0 - 2021-07-02
 
 - (Ian) Fix for GH-25: required files were not listed in the gemspec
