@@ -1,5 +1,8 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.2 - 2022-02-02
+
+- (Ian) Re-write the README
 
 ## 0.3.1 - 2021-07-20 (Bogdan)
 
