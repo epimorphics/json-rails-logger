@@ -3,6 +3,6 @@
 module JsonRailsLogger
   MAJOR = 0
   MINOR = 3
-  FIX = 2
+  FIX = 3
   VERSION = "#{MAJOR}.#{MINOR}.#{FIX}"
 end
