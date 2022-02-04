@@ -1,5 +1,9 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.3. - 2022-02-03
+
+- (Ian) Add the `.silence()` method to the base logger
+
 ## 0.3.2 - 2022-02-02
 
 - (Ian) Re-write the README
