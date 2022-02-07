@@ -1,5 +1,10 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.4 - 2022-02-07
+
+- (Ian) Set the base logger class to `ActiveSupport::Logger` so that it plays
+  better with Rails
+
 ## 0.3.3. - 2022-02-03
 
 - (Ian) Add the `.silence()` method to the base logger
