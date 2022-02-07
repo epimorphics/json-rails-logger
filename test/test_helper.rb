@@ -2,7 +2,9 @@
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
-require 'byebug'
+# enable if required during debugging
+# require 'byebug'
+
 require 'minitest/autorun'
 
 require 'logger'
