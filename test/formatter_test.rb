@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-
-require './lib/json_rails_logger'
+require './test/test_helper'
 
 describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLength
   let(:fixture) do

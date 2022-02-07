@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'constants'
-
 module JsonRailsLogger
   # Middleware that saves the request_id into a constant
   # and clears it after usage in the formatter

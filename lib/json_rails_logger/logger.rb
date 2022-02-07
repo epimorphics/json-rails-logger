@@ -2,18 +2,18 @@
 
 module JsonRailsLogger
   # The custom logger class that sets up our formatter
-  class Logger < ::Logger
-    include ActiveSupport::LoggerSilence
+  class Logger < ActiveSupport::Logger
+    # Initialize a logger which is opinionated about emitting log messages
+    # in a standard JSON format that meets the expectations of Epimorphics
+    # operations and monitoring tools
+    #
+    # +logdev+ The output device to send log messages to
+    def initialize(logdev)
+      formatter = JsonRailsLogger::JsonFormatter.new
+      formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # List of all the arguments with their default values:
-    # logdev, shift_age = 0, shift_size = 1_048_576, level: DEBUG,
-    # progname: nil, formatter: nil, datetime_format: nil,
-    # binmode: false, shift_period_suffix: '%Y%m%d'
-    def initialize(*args)
-      @formatter = JsonRailsLogger::JsonFormatter.new
-      @formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-
-      super(*args, formatter: @formatter)
+      super(logdev, formatter: formatter)
+      @formatter = formatter
     end
   end
 end
