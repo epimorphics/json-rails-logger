@@ -11,6 +11,13 @@ currently active HTTP request in every log.
 
 This gem can be used with any Rails app using the installation steps below.
 
+## Internal structure
+
+This logger makes use of [lograge](https://github.com/roidrage/lograge) to
+"attempt to tame Rails' default policy". However, we augment the JSON format
+used by lograge to fit our local requirements, and ensure the HTTP request ID
+is logged where available.
+
 ## Using with a Rails application
 
 In your Rails app, add this to your `Gemfile`:
@@ -68,12 +75,13 @@ To run the tests, use:\
 
 ### `Makefile`
 
-There is a `Makefile` with some shared dev tasks, but this is
-primarily used by the automated publishing workflow.
+There is a `Makefile` with some shared dev tasks.
 
 To check that the gem will build correctly: `make build`
 
 To create the GitHub and Bundler authorisations: `make auth`
+
+To publish the gem to the GitHub package registry: `make publish`
 
 ### Publishing a new version of the gem
 
@@ -84,6 +92,7 @@ To publish a new version of the gem after a bugfix or feature addition:
 2. Update the `CHANGELOG.md` to document the new change
 3. `git tag` the new state with a tag that matches the new version
 4. Push the new tagged release to GitHub
+5. Run `make publish` to push the new gem to the GitHub package registry.
 
 Pushing a tagged version will automatically trigger the publish gem
 workflow, which should result in the gem appearing on the
