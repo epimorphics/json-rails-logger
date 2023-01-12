@@ -90,4 +90,14 @@ describe 'JsonRailsLogger::JsonFormatter' do # rubocop:disable Metrics/BlockLeng
       _(json_output['request_id']).must_equal(request_id_fixture['request_id'])
     end
   end
+
+  it 'should correctly format a millisecond duration into microseconds' do
+    message = '{"duration": 1234567.89}'
+
+    log_output = fixture.call('INFO', timestamp, progname, message)
+    _(log_output).must_be_kind_of(String)
+
+    json_output = JSON.parse(log_output)
+    _(json_output['duration']).must_equal(1_234_567_890)
+  end
 end
