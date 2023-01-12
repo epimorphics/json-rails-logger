@@ -49,19 +49,23 @@ module JsonRailsLogger
       { message: msg.strip }
     end
 
+    # rubocop:disable Metrics/AbcSize
     def format_message(msg)
       new_msg = { rails: { environment: ::Rails.env } }
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
-      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }
-                     .map(&:to_h)
+      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }.map(&:to_h)
+
+      # If duration is a float, convert it to an integer as microseconds
+      split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
 
       new_msg.merge!(split_msg[0])
       new_msg[:rails].merge!(split_msg[1])
 
       new_msg
     end
+    # rubocop:enable Metrics/AbcSize
 
     def string_message_field?(msg)
       msg.is_a?(Hash) &&
@@ -112,6 +116,14 @@ module JsonRailsLogger
       accept = splitted_msg[1]&.split('"')&.at(1)
 
       { user_agent: user_agent, accept: accept }
+    end
+
+    def includes_duration?(msg)
+      msg.key?('duration')
+    end
+
+    def normalise_duration(msg)
+      msg.to_h { |k, v| k.to_s == 'duration' && v.is_a?(Float) ? [k, (v * 1000).round(0)] : [k, v] }
     end
   end
 end
