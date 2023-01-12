@@ -34,7 +34,7 @@ module JsonRailsLogger
 
     def request_id
       request_id = Thread.current[JsonRailsLogger::REQUEST_ID]
-      { 'request_id': request_id } if request_id
+      { request_id: request_id } if request_id
     end
 
     def process_message(raw_msg)
@@ -87,7 +87,7 @@ module JsonRailsLogger
     end
 
     def status_message(msg)
-      status = msg.split(' ')[1]
+      status = msg.split[1]
 
       { status: status }
     end
@@ -98,7 +98,7 @@ module JsonRailsLogger
     end
 
     def get_message(msg)
-      splitted_msg = msg.split(' ')
+      splitted_msg = msg.split
       method = splitted_msg[0]
       path = splitted_msg[1]
 
