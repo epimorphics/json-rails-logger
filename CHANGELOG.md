@@ -1,5 +1,17 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.5 - 2023-01
+
+- (Jon) With additional logging being passed into the logger from outside
+  sources, i.e. rails, this refactor validates if the duration property exists,
+  checks for a floating point, usually meaning milliseconds, multiplies it by
+  1000 to convert to microseconds and then rounds the result down to 0 decimal
+  points to log to the system tooling.
+- (Jon) Additional tweaks for the `.gemspec` details to bring them inline with
+  the current company format.
+- (Jon) Updated gemfile.lock with latest version updates
+- (Jon) Updated Github testing workflow to use the v3 checkout version
+
 ## 0.3.4 - 2022-02-07
 
 - (Ian) Set the base logger class to `ActiveSupport::Logger` so that it plays
@@ -43,5 +55,5 @@
 
 ## 0.1.0 - 2021-01-26 (Bogdan)
 
-- This is an initial release, contains a simple JSON Rails Logger
-  with some customisation applied to it
+- This is an initial release, contains a simple JSON Rails Logger with some
+  customisation applied to it
