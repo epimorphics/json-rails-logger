@@ -11,6 +11,8 @@
   the current company format.
 - (Jon) Updated gemfile.lock with latest version updates
 - (Jon) Updated Github testing workflow to use the v3 checkout version
+- (Jon) Refactored the version cadence creation to include a SUFFIX value if
+  provided; otherwise no SUFFIX is included in the version number.
 
 ## 0.3.4 - 2022-02-07
 
