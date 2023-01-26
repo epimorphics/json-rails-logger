@@ -1,2 +1,21 @@
 AllCops:
   TargetRubyVersion: 2.6
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 100
+  Exclude:
+    - test/**/*
+
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - test/**/*
+    - json_rails_logger.gemspec
+
+Style/Documentation:
+  Exclude:
+    - test/**/*
+
+Style/OptionalBooleanParameter:
+  Enabled: false
