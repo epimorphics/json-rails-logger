@@ -1,5 +1,10 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.5.1 - 2023-03
+
+- (Jon) Added specific versions to the gemspec dependencies to resolve open-ended
+  dependency warnings when publishing the gem.
+
 ## 0.3.5 - 2023-01
 
 - (Jon) With additional logging being passed into the logger from outside
