@@ -27,9 +27,11 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'json'
-  spec.add_runtime_dependency 'lograge'
-  spec.add_runtime_dependency 'railties'
+  # * Resolves open-ended dependencies warning on `make publish`
+  # * See https://guides.rubygems.org/specification-reference/ for more information.
+  spec.add_runtime_dependency 'json', '~> 2.3.0'
+  spec.add_runtime_dependency 'lograge', '~> 0.12.0'
+  spec.add_runtime_dependency 'railties', '~> 7.0.0'
 
-  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rake', '~> 13.0.0'
 end
