@@ -29,9 +29,9 @@ Gem::Specification.new do |spec|
 
   # * Resolves open-ended dependencies warning on `make publish`
   # * See https://guides.rubygems.org/specification-reference/ for more information.
-  spec.add_runtime_dependency 'json', '~> 2.3.0'
+  spec.add_runtime_dependency 'json', '~> 2', '>= 2.6.3'
   spec.add_runtime_dependency 'lograge', '~> 0.12.0'
-  spec.add_runtime_dependency 'railties', '~> 7.0.0'
+  spec.add_runtime_dependency 'railties', '>= 6.1.4.1'
 
-  spec.add_development_dependency 'rake', '~> 13.0.0'
+  spec.add_development_dependency 'rake', '~> 13.0', '>= 13.0.6'
 end
