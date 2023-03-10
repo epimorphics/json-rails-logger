@@ -1,13 +1,22 @@
 # Changelog for the JSON Rails Logger gem
 
-## 0.3.5.2 - 2023-03
+## 0.3.5.3 - 2023-03-10
+
+- (Jon) Added .ruby-version file to ensure the gem is locked to the specific
+  2.6.6 ruby version to reduce any potential issues with current app integrations
+- (Jon) Updated the gemspec to ensure the gem is locked to the same 2.6.6 ruby
+  version to reduce any potential issues with current app integrations
+- (Jon) Removed dependency version locks due to connected apps not supporting
+  newer versions of gems being used.
+
+## 0.3.5.2 - 2023-03-07
 
 - (Jon) Updated the gemspec to ensure the dependency versions are locked to
   specific base versions to avoid any potential issues with the gem being used
 - (Jon) Added specific versions to the gemspec dependencies to resolve open-ended
   dependency warnings when publishing the gem.
 
-## 0.3.5 - 2023-01
+## 0.3.5.1 - 2023-01-16
 
 - (Jon) With additional logging being passed into the logger from outside
   sources, i.e. rails, this refactor validates if the duration property exists,
