@@ -50,8 +50,9 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['rails']['user_agent']).must_equal('Faraday v1.3.0')
-    _(json_output['rails']['accept']).must_equal('application/json')
+
+    _(json_output['user_agent']).must_equal('Faraday v1.3.0')
+    _(json_output['accept']).must_equal('application/json')
   end
 
   it 'should correctly format the timestamp' do
