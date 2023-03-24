@@ -4,17 +4,17 @@ module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter
     COMMON_KEYS = %w[
-      method path status duration
+      method path status duration user_agent accept request_id
     ].freeze
 
-    def call(severity, timestamp, _progname, raw_msg)
+    def call(severity, timestamp, progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
       new_msg = format_message(msg)
 
-      payload = { level: sev,
-                  ts: timestp }
+      payload = { ts: timestp,
+                  level: sev}
 
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h)
@@ -51,7 +51,7 @@ module JsonRailsLogger
 
     # rubocop:disable Metrics/AbcSize
     def format_message(msg)
-      new_msg = { rails: { environment: ::Rails.env } }
+      new_msg = {}
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
@@ -61,7 +61,6 @@ module JsonRailsLogger
       split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
 
       new_msg.merge!(split_msg[0])
-      new_msg[:rails].merge!(split_msg[1])
 
       new_msg
     end
@@ -107,7 +106,7 @@ module JsonRailsLogger
 
     def user_agent_message?(msg)
       msg.is_a?(String) &&
-        msg.match(/User-Agent: .+Accept: .+/m)
+        msg.match(/User-Agent: .[\S\s]+Accept: .+/m)
     end
 
     def user_agent_message(msg)
