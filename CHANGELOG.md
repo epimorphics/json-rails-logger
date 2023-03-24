@@ -1,5 +1,12 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.5.4 - 2023-03-24
+
+- (Jon) Removed the rails specific properties from the JSON output as they are not
+  required by the logging monitors and consume more disk space than desired.
+- (Jon) Reordered the Timestamp and Level properties to match the order of other
+  logs on the Epimorphics system tooling.
+
 ## 0.3.5.3 - 2023-03-10
 
 - (Jon) Added .ruby-version file to ensure the gem is locked to the specific
