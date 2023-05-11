@@ -7,7 +7,7 @@ module JsonRailsLogger
       method path status duration user_agent accept request_id
     ].freeze
 
-    def call(severity, timestamp, progname, raw_msg)
+    def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
