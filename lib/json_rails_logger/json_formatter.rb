@@ -55,6 +55,8 @@ module JsonRailsLogger
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
+      return new_msg.merge(msg) if !msg.is_a?(Enumerable)
+
       split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }.map(&:to_h)
 
       # If duration is a float, convert it to an integer as microseconds
