@@ -1,5 +1,14 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.5.5 - 2023-05-10
+
+- (Jon) Removed .ruby-version file contents to allow the gem to work with
+current app integrations; e.g. regulated products
+- (Jon) Reverted the `gemspec` file to ensure the gem accepts higher ruby versions
+and allows it to work with current app integrations; e.g. regulated products
+- (Jon) Reverted the `unit_tests.yml` file to ensure the gem accepts higher ruby
+versions and allows it to work with current app integrations; e.g. regulated products
+
 ## 0.3.5.4 - 2023-03-24
 
 - (Jon) Removed the rails specific properties from the JSON output as they are not
