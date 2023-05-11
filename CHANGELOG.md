@@ -6,7 +6,7 @@
 current app integrations; e.g. regulated products
 - (Jon) Reverted the `gemspec` file to ensure the gem accepts higher ruby versions
 and allows it to work with current app integrations; e.g. regulated products
-- (Jon) Reverted the `unit_tests.yml` file to ensure the gem accepts higher ruby
+- (Jon) Reverted the `unit_tests.yml` file to ensure the test accepts higher ruby
 versions and allows it to work with current app integrations; e.g. regulated products
 
 ## 0.3.5.4 - 2023-03-24
