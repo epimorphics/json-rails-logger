@@ -46,7 +46,7 @@ module JsonRailsLogger
       return get_message(msg) if get_message?(msg)
       return user_agent_message(msg) if user_agent_message?(msg)
 
-      { message: msg.strip }
+      { message: msg.squish }
     end
 
     # rubocop:disable Metrics/AbcSize
