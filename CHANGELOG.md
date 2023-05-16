@@ -2,8 +2,6 @@
 
 ## 0.3.5.5 - 2023-05-10
 
-- (Jon) Removed .ruby-version file contents to allow the gem to work with
-current app integrations; e.g. regulated products
 - (Jon) Reverted the `gemspec` file to ensure the gem accepts higher ruby versions
 and allows it to work with current app integrations; e.g. regulated products
 - (Jon) Reverted the `unit_tests.yml` file to ensure the test accepts higher ruby
