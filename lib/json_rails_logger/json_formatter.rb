@@ -7,7 +7,7 @@ module JsonRailsLogger
       method path status duration user_agent accept request_id
     ].freeze
 
-    def call(severity, timestamp, progname, raw_msg)
+    def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
@@ -46,7 +46,7 @@ module JsonRailsLogger
       return get_message(msg) if get_message?(msg)
       return user_agent_message(msg) if user_agent_message?(msg)
 
-      { message: msg.strip }
+      { message: msg.squish }
     end
 
     # rubocop:disable Metrics/AbcSize
@@ -54,6 +54,8 @@ module JsonRailsLogger
       new_msg = {}
 
       return msg.merge(new_msg) if string_message_field?(msg)
+
+      return new_msg.merge(msg) if !msg.is_a?(Enumerable)
 
       split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }.map(&:to_h)
 
