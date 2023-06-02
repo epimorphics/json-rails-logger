@@ -1,2 +1,5 @@
 *.gem
 .byebug_history
+.bundle
+.github-token
+.npmrc
