@@ -1,23 +1,34 @@
 # Changelog for the JSON Rails Logger gem
 
+## 0.3.6.0 - 2023-06-01
+
+- (Jon) Now uses the `env['action_dispatch.request_id']` variable ONLY in the
+development environment in order to mimic the `HTTP_X_REQUEST_ID` header as that
+header doesn't exist when running rails server in the development environment.
+- (Jon) Reports on `GET, POST, PUT, DELETE, PATCH` request methods instead of
+only `GET`
+
 ## 0.3.5.5 - 2023-05-10
 
-- (Jon) Reverted the `gemspec` file to ensure the gem accepts higher ruby versions
-and allows it to work with current app integrations; e.g. regulated products
-- (Jon) Reverted the `unit_tests.yml` file to ensure the test accepts higher ruby
-versions and allows it to work with current app integrations; e.g. regulated products
+- (Jon) Reverted the `gemspec` file to ensure the gem accepts higher ruby
+versions and allows it to work with current app integrations; e.g. regulated
+products
+- (Jon) Reverted the `unit_tests.yml` file to ensure the test accepts higher
+ruby versions and allows it to work with current app integrations; e.g.
+regulated products
 
 ## 0.3.5.4 - 2023-03-24
 
-- (Jon) Removed the rails specific properties from the JSON output as they are not
-  required by the logging monitors and consume more disk space than desired.
+- (Jon) Removed the rails specific properties from the JSON output as they are
+  not required by the logging monitors and consume more disk space than desired.
 - (Jon) Reordered the Timestamp and Level properties to match the order of other
   logs on the Epimorphics system tooling.
 
 ## 0.3.5.3 - 2023-03-10
 
 - (Jon) Added .ruby-version file to ensure the gem is locked to the specific
-  2.6.6 ruby version to reduce any potential issues with current app integrations
+  2.6.6 ruby version to reduce any potential issues with current app
+  integrations
 - (Jon) Updated the gemspec to ensure the gem is locked to the same 2.6.6 ruby
   version to reduce any potential issues with current app integrations
 - (Jon) Removed dependency version locks due to connected apps not supporting
@@ -27,8 +38,8 @@ versions and allows it to work with current app integrations; e.g. regulated pro
 
 - (Jon) Updated the gemspec to ensure the dependency versions are locked to
   specific base versions to avoid any potential issues with the gem being used
-- (Jon) Added specific versions to the gemspec dependencies to resolve open-ended
-  dependency warnings when publishing the gem.
+- (Jon) Added specific versions to the gemspec dependencies to resolve
+  open-ended dependency warnings when publishing the gem.
 
 ## 0.3.5.1 - 2023-01-16
 

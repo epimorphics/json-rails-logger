@@ -7,14 +7,18 @@ module JsonRailsLogger
       method path status duration user_agent accept request_id
     ].freeze
 
+    REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
+
     def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
       new_msg = format_message(msg)
 
-      payload = { ts: timestp,
-                  level: sev}
+      payload = {
+        ts: timestp,
+        level: sev
+      }
 
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h)
@@ -41,9 +45,8 @@ module JsonRailsLogger
       msg = normalize_message(raw_msg)
 
       return msg unless msg.is_a?(String)
-
       return status_message(msg) if status_message?(msg)
-      return get_message(msg) if get_message?(msg)
+      return request_type(msg) if request_type?(msg)
       return user_agent_message(msg) if user_agent_message?(msg)
 
       { message: msg.squish }
@@ -93,16 +96,15 @@ module JsonRailsLogger
       { status: status }
     end
 
-    def get_message?(msg)
+    def request_type?(msg)
       msg.is_a?(String) &&
-        msg.match(/GET http\S+/)
+        REQUEST_METHODS.any? { |method| msg.match(/#{method} http\S+/) }
     end
 
-    def get_message(msg)
+    def request_type(msg)
       splitted_msg = msg.split
       method = splitted_msg[0]
       path = splitted_msg[1]
-
       { method: method, path: path }
     end
 
