@@ -7,7 +7,7 @@ module JsonRailsLogger
       method path status duration user_agent accept request_id
     ].freeze
 
-    REQUEST_METHODS = %w[GET, POST, PUT, DELETE, PATCH].freeze
+    REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
@@ -45,7 +45,6 @@ module JsonRailsLogger
       msg = normalize_message(raw_msg)
 
       return msg unless msg.is_a?(String)
-
       return status_message(msg) if status_message?(msg)
       return request_type(msg) if request_type?(msg)
       return user_agent_message(msg) if user_agent_message?(msg)
@@ -106,7 +105,6 @@ module JsonRailsLogger
       splitted_msg = msg.split
       method = splitted_msg[0]
       path = splitted_msg[1]
-
       { method: method, path: path }
     end
 
