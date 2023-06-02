@@ -1,11 +1,12 @@
 # Changelog for the JSON Rails Logger gem
 
-## 0.3.6.0 - 2023-05-24
+## 0.3.6.0 - 2023-06-01
 
-- (Jon) After determining the request_id variable was not always being filled in
-  via the `env['HTTP_X_REQUEST_ID']` request,  the rails environment variable
-  `env['action_dispatch.request_id']` was re-added to ensure this value was
-  collected and parsed.
+- (Jon) Now uses the `env['action_dispatch.request_id']` variable ONLY in the
+development environment in order to mimic the `HTTP_X_REQUEST_ID` header as that
+header doesn't exist when running rails server in the development environment.
+- (Jon) Reports on `GET, POST, PUT, DELETE, PATCH` request methods instead of
+only `GET`
 
 ## 0.3.5.5 - 2023-05-10
 
