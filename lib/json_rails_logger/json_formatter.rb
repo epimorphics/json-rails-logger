@@ -3,12 +3,18 @@
 module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter
-    COMMON_KEYS = %w[
-      method path status duration user_agent accept request_id
+    ## Required keys to be logged to the output
+    REQUIRED_KEYS = %w[
+      method path status duration user_agent accept request_id url message
     ].freeze
 
+    ## Optional keys to be ignored from the output for the time being
+    OPTIONAL_KEYS = %w[format controller action view exception exception_object].freeze
+
+    ## Request methods to check for in the message
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
+    # rubocop:disable Metrics/MethodLength
     def call(severity, timestamp, _progname, raw_msg)
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
@@ -21,10 +27,11 @@ module JsonRailsLogger
       }
 
       payload.merge!(request_id.to_h)
-      payload.merge!(new_msg.to_h)
+      payload.merge!(new_msg.to_h.except!(:optional).compact)
 
       "#{payload.to_json}\n"
     end
+    # rubocop:enable Metrics/MethodLength
 
     private
 
@@ -52,24 +59,29 @@ module JsonRailsLogger
       { message: msg.squish }
     end
 
-    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def format_message(msg)
-      new_msg = {}
+      new_msg = { optional: {} }
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
-      return new_msg.merge(msg) if !msg.is_a?(Enumerable)
+      return new_msg.merge(msg) unless msg.is_a?(Enumerable)
 
-      split_msg = msg.partition { |k, _v| COMMON_KEYS.include?(k.to_s) }.map(&:to_h)
+      split_msg = msg.partition { |k, _v| REQUIRED_KEYS.include?(k.to_s) }.map(&:to_h)
+      if split_msg[0].empty?
+        split_msg = msg.partition do |k, _v|
+          OPTIONAL_KEYS.exclude?(k.to_s)
+        end.map(&:to_h)
+      end
 
-      # If duration is a float, convert it to an integer as microseconds
       split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
 
       new_msg.merge!(split_msg[0])
+      new_msg[:optional].merge!(split_msg[1])
 
       new_msg
     end
-    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
     def string_message_field?(msg)
       msg.is_a?(Hash) &&
@@ -125,6 +137,7 @@ module JsonRailsLogger
       msg.key?('duration')
     end
 
+    # If duration is a float, convert it to an integer as microseconds
     def normalise_duration(msg)
       msg.to_h { |k, v| k.to_s == 'duration' && v.is_a?(Float) ? [k, (v * 1000).round(0)] : [k, v] }
     end
