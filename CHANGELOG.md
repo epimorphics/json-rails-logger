@@ -1,5 +1,18 @@
 # Changelog for the JSON Rails Logger gem
 
+## 1.0.1 - 2023-06-07
+
+- (Jon) Updated the logging to include additional properties to ensure the
+  values are always logged to the system tooling.
+- (Jon) Updated the logging to exclude the Rails internal properties to ensure
+  the values are NOT logged to the system tooling.
+- (Jon) Minor formatting updates to resolve or silence Rubocop warnings
+
+## 1.0.0 - 2023-06-01
+
+- (Jon) Updated the version for the gem to be 1.0.0 as the gem has been in use
+  for a while and is stable.
+
 ## 0.3.6.0 - 2023-06-01
 
 - (Jon) Now uses the `env['action_dispatch.request_id']` variable ONLY in the
