@@ -5,7 +5,7 @@ module JsonRailsLogger
   class JsonFormatter < ::Logger::Formatter
     ## Required keys to be logged to the output
     REQUIRED_KEYS = %w[
-      method path status duration user_agent accept request_id url message
+      method path status duration user_agent accept request_id request_url message
     ].freeze
 
     ## Optional keys to be ignored from the output for the time being
@@ -30,6 +30,7 @@ module JsonRailsLogger
       payload.merge!(new_msg.to_h.except!(:optional).compact)
 
       "#{payload.to_json}\n"
+      "\n#{payload.to_json}\n" if Rails.env.development?
     end
     # rubocop:enable Metrics/MethodLength
 
