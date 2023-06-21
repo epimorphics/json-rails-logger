@@ -1,5 +1,10 @@
 # Changelog for the JSON Rails Logger gem
 
+## 1.0.2 - 2023-06-21
+
+- (Jon) Renamed parameter to reduce chance of conflict with other gems or code
+  that may use the same parameter name.
+
 ## 1.0.1 - 2023-06-07
 
 - (Jon) Updated the logging to include additional properties to ensure the
