@@ -29,8 +29,9 @@ module JsonRailsLogger
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h.except!(:optional).compact)
 
-      "#{payload.to_json}\n"
       "\n#{payload.to_json}\n" if Rails.env.development?
+
+      "#{payload.to_json}\n"
     end
     # rubocop:enable Metrics/MethodLength
 
