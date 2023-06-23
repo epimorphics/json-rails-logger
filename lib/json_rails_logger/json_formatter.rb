@@ -101,7 +101,7 @@ module JsonRailsLogger
 
     def status_message?(msg)
       msg.is_a?(String) &&
-        msg.match(/Status [0-9]+/)
+        msg.downcase.match(/status [0-9]+/)
     end
 
     def status_message(msg)
@@ -124,7 +124,7 @@ module JsonRailsLogger
 
     def user_agent_message?(msg)
       msg.is_a?(String) &&
-        msg.match(/User-Agent: .[\S\s]+Accept: .+/m)
+        msg.downcase.match(/user-agent: .[\S\s]+accept: .+/m)
     end
 
     def user_agent_message(msg)
