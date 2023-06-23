@@ -1,5 +1,11 @@
 # Changelog for the JSON Rails Logger gem
 
+## 1.0.3 - 2023-06-23
+
+- (Jon) For continued improvements to the logs, additional keys need to be added
+  to parse the details
+  - Also includes string downcasing to improve matching of request fields
+
 ## 1.0.2 - 2023-06-21
 
 - (Jon) Renamed parameter to reduce chance of conflict with other gems or code
