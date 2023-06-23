@@ -5,7 +5,7 @@ module JsonRailsLogger
   class JsonFormatter < ::Logger::Formatter
     ## Required keys to be logged to the output
     REQUIRED_KEYS = %w[
-      method path status duration user_agent accept request_id request_url message
+      method path status duration user_agent accept request_id request_url message query_string
     ].freeze
 
     ## Optional keys to be ignored from the output for the time being
