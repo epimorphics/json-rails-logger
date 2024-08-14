@@ -1,5 +1,14 @@
 # Changelog for the JSON Rails Logger gem
 
+## 1.0.4-rc01 - 2023-08
+
+- (Jon) Updated the GitHub action to reflect the revised company's gem
+  publishing strategy
+- (Jon) Removed the push trigger as gem creation needs to be a manual process
+- (Jon) Reorganised and removed duplicated makefile targets
+- (Jon) Introduces the use of the `${NAME}` variable to increase portability of
+  the revised makefile approach
+
 ## 1.0.3 - 2023-06-23
 
 - (Jon) For continued improvements to the logs, additional keys need to be added
