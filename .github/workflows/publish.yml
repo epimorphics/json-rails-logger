@@ -1,29 +1,42 @@
-name: Publish to GPR
+name: Release and Publish Gem
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - main
 
 #---- Below this line should not require editing ----
 jobs:
-  publish:
-    name: "Publish: ECR Image Upload"
-    runs-on: ubuntu-20.04
-    outputs:
-      image: ${{ steps.mapper.outputs.image }}
-      tag: ${{ steps.gitinfo.outputs.tag }}
-      target: ${{ steps.mapper.outputs.target }}
-
+  build:
+    name: "Build gem package"
+    runs-on: ubuntu-latest
     steps:
-    - name: "Checkout"
-      uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-    - name: "Publish image"
-      if: steps.mapper.outputs.image != ''
-      env:
-        IMAGE: ${{ steps.mapper.outputs.image }}
-        TAG: ${{ steps.gitinfo.outputs.tag }}
-      shell: bash
+    - name: "Git Information"
+      id: gitinfo
       run: |
-        PAT=${{ secrets.EPI_GPR_ACCESS_TOKEN }} make publish
+        echo name=${GITHUB_REF#refs/*/}       | tee -a $GITHUB_OUTPUT
+        echo branch=${GITHUB_REF#refs/heads/} | tee -a $GITHUB_OUTPUT
+        make tags                             | tee -a $GITHUB_OUTPUT
+
+    - name: "Build gem"
+      run: "make gem"
+
+    - name: "Create Release"
+      id: release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.gitinfo.outputs.version }}
+        name: v${{ steps.gitinfo.outputs.version }}
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+        files: |
+          json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
+
+    - name: "Publish gem"
+      run: |
+        PAT=${{ secrets.GITHUB_TOKEN }} make publish
