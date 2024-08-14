@@ -2,7 +2,7 @@
 
 NAME?=json_rails_logger
 OWNER?=epimorphics
-VERSION?=$(shell ruby -e 'require "./lib/json_rails_logger/version" ; puts JsonRailsLogger::VERSION')
+VERSION?=$(shell ruby -e 'require "./lib/${NAME}/version" ; puts JsonRailsLogger::VERSION')
 PAT?=$(shell read -p 'Github access token:' TOKEN; echo $$TOKEN)
 
 AUTH=${HOME}/.gem/credentials
@@ -12,18 +12,18 @@ SPEC=${NAME}.gemspec
 
 all: publish
 
+auth: ${AUTH}
+
+build: gem
+
 ${AUTH}:
 	@mkdir -p ${HOME}/.gem
 	@echo '---' > ${AUTH}
 	@echo ':github: Bearer ${PAT}' >> ${AUTH}
 	@chmod 0600 ${AUTH}
 
-${GEM}: ${SPEC} ./lib/json_rails_logger/version.rb
+${GEM}: ${SPEC} ./lib/${NAME}/version.rb
 	gem build ${SPEC}
-
-auth: ${AUTH}
-
-build: gem
 
 gem: ${GEM}
 	@echo ${GEM}
@@ -32,13 +32,16 @@ test: gem
 	@bundle install
 	@rake test
 
-publish: ${GEM}
+publish: ${AUTH} ${GEM}
 	@echo Publishing package ${NAME}:${VERSION} to ${OWNER} ...
 	@gem push --key github --host ${GPR} ${GEM}
 	@echo Done.
 
 clean:
-	@rm -rf ${GEM} 
+	@rm -rf ${GEM}
 
 realclean: clean
-	@rm -rf ${AUTH} 
+	@rm -rf ${AUTH}
+
+tags:
+	@echo version=${VERSION}
