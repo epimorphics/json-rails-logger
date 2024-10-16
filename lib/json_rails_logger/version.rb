@@ -2,8 +2,8 @@
 
 module JsonRailsLogger
   MAJOR = 1
-  MINOR = 0
-  PATCH = 4
-  SUFFIX = 'rc01'
+  MINOR = 1
+  PATCH = 0
+  SUFFIX = nil
   VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}#{SUFFIX && "-#{SUFFIX}"}"
 end
