@@ -2,6 +2,7 @@
 
 module JsonRailsLogger
   REQUEST_ID = :request_id
+  QUERY_STRING = :query_string
   # * THE FOLLOWING ARE NOT CURRENTLY USED BUT AVAILABLE FOR FUTURE USE * #
   # REQUEST_URI = :request_uri
   # REQUEST_METHOD = :request_method
