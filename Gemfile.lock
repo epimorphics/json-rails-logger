@@ -1,7 +1,11 @@
 PATH
   remote: .
   specs:
+<<<<<<< Updated upstream
     json_rails_logger (1.1.0)
+=======
+    json_rails_logger (1.0.4.pre.rc01)
+>>>>>>> Stashed changes
       json (~> 2.0)
       lograge (~> 0.11)
       railties (~> 6.0)
