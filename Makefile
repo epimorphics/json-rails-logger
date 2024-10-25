@@ -12,10 +12,6 @@ SPEC=${NAME}.gemspec
 
 all: publish
 
-auth: ${AUTH}
-
-build: gem
-
 ${AUTH}:
 	@mkdir -p ${HOME}/.gem
 	@echo '---' > ${AUTH}
@@ -25,12 +21,21 @@ ${AUTH}:
 ${GEM}: ${SPEC} ./lib/${NAME}/version.rb
 	gem build ${SPEC}
 
+auth: ${AUTH}
+
+build: gem
+
+lint: gem
+	@bundle install
+	@echo "Running rubocop..."
+	@bundle exec rubocop
+
 gem: ${GEM}
 	@echo ${GEM}
 
 test: gem
 	@bundle install
-	@rake test
+	@bundle exec rake test
 
 publish: ${AUTH} ${GEM}
 	@echo Publishing package ${NAME}:${VERSION} to ${OWNER} ...
