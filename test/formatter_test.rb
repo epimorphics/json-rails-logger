@@ -92,13 +92,13 @@ describe 'JsonRailsLogger::JsonFormatter' do
     end
   end
 
-  it 'should correctly format a millisecond duration into microseconds' do
+  it 'should correctly format a microsecond duration into milliseconds' do
     message = '{"duration": 1234567.89}'
 
     log_output = fixture.call('INFO', timestamp, progname, message)
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['duration']).must_equal(1_234_567_890)
+    _(json_output['duration']).must_equal(1_234_568)
   end
 end
