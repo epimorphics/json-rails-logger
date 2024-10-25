@@ -25,6 +25,10 @@ auth: ${AUTH}
 
 build: gem
 
+lint: gem
+	@echo "Running rubocop..."
+	@bundle exec rubocop
+
 gem: ${GEM}
 	@echo ${GEM}
 
