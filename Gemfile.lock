@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json_rails_logger (1.1.0)
+    json_rails_logger (1.1.1)
       json (~> 2.0)
       lograge (~> 0.11)
       railties (~> 6.0)
@@ -28,6 +28,7 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
+    ast (2.4.2)
     builder (3.2.4)
     concurrent-ruby (1.2.2)
     crass (1.0.6)
@@ -51,8 +52,10 @@ GEM
       racc (~> 1.4)
     nokogiri (1.13.10-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.13.10-x86_64-linux)
-      racc (~> 1.4)
+    parallel (1.26.3)
+    parser (3.3.5.0)
+      ast (~> 2.4.1)
+      racc
     racc (1.6.2)
     rack (2.2.6.3)
     rack-test (2.0.2)
@@ -68,12 +71,28 @@ GEM
       method_source
       rake (>= 12.2)
       thor (~> 1.0)
+    rainbow (3.1.1)
     rake (13.0.6)
+    regexp_parser (2.9.2)
     request_store (1.5.1)
       rack (>= 1.4)
+    rexml (3.3.9)
+    rubocop (1.25.1)
+      parallel (~> 1.10)
+      parser (>= 3.1.0.0)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 1.8, < 3.0)
+      rexml
+      rubocop-ast (>= 1.15.1, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 1.4.0, < 3.0)
+    rubocop-ast (1.32.3)
+      parser (>= 3.3.1.0)
+    ruby-progressbar (1.13.0)
     thor (1.2.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    unicode-display_width (2.6.0)
     zeitwerk (2.6.7)
 
 PLATFORMS
@@ -84,6 +103,7 @@ PLATFORMS
 DEPENDENCIES
   json_rails_logger!
   rake (~> 13.0)
+  rubocop (~> 1.25.0)
 
 BUNDLED WITH
-   2.4.22
+   2.4.4
