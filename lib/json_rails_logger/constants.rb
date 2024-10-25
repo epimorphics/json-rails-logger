@@ -6,6 +6,7 @@ module JsonRailsLogger
   EXCEPTION = :exception
   MESSAGE = :message
   METHOD = :method
+  PATH = :request_path # Alias for REQUEST_PATH
   QUERY_STRING = :query_string
   REQUEST_ID = :request_id
   REQUEST_PARAMS = :request_params

@@ -27,6 +27,7 @@ module JsonRailsLogger
       keep_alive
       message
       method
+      path
       query_string
       remote_addr
       request_id
