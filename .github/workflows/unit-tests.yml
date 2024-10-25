@@ -1,0 +1,31 @@
+name: Unit Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Record desired ruby version"
+        id: ruby
+        shell: bash
+        run: |
+          [ -f .ruby-version ] && echo version=$(cat .ruby-version) | tee -a $GITHUB_OUTPUT ||  echo "version=" >> $GITHUB_OUTPUT
+
+      - name: "Setup ruby"
+        if:  steps.ruby.outputs.version != ''
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ steps.ruby.outputs.version }}
+
+      - name: Install dependencies (bundle)
+        run: bundle install
+
+      - name: Run checks
+        run: |
+          PAT=${{ secrets.EPI_GPR_READ_ACCESS_TOKEN }} make lint test
