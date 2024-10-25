@@ -86,10 +86,6 @@ module JsonRailsLogger
       { request_id: request_id } if request_id
     end
 
-    def format_datetime(time)
-      time.strftime('%Y-%m-%dT%H:%M:%S.%6N')
-    end
-
     def query_string
       query_string = Thread.current[JsonRailsLogger::QUERY_STRING]
       { query_string: query_string } if query_string
