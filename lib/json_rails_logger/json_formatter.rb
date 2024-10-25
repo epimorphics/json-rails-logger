@@ -9,25 +9,29 @@ module JsonRailsLogger
       action
       backtrace
       body
-      cache_control
-      charset
-      connection
       controller
-      cookies
       duration
       encoding
       forwarded_for
       gateway
-      host
+      http_accept_charset
+      http_accept_encoding
+      http_accept_language
+      http_cache_control
+      http_charset
+      http_cookie
+      http_connection
+      http_host
+      http_origin
+      http_referer
       keep_alive
-      language
       message
       method
-      path
       query_string
-      referrer
-      remote
+      remote_addr
       request_id
+      request_params
+      request_path
       request_status
       request_uri
       request_url
@@ -37,11 +41,10 @@ module JsonRailsLogger
       server_software
       status
       user_agent
-      view
     ].freeze
 
     ## Optional keys to be ignored from the output for the time being
-    OPTIONAL_KEYS = %w[format exception exception_object].freeze
+    OPTIONAL_KEYS = %w[format exception exception_object view].freeze
 
     ## Request methods to check for in the message
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
