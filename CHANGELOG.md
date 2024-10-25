@@ -1,8 +1,15 @@
 # Changelog for the JSON Rails Logger gem
 
+## 1.1.1 - 2024-10
+
+- (Jon) Updated the exposed keys to allow more flexibility in the logging
+- (Jon) Merged the two GitHub actions into one to reduce the number of actions
+  required to maintain the gem, while introducing dependency on successful linting
+  and tests before the gem is published
+
 ## 1.1.0 - 2024-10
 
-(Dan) Updates ruby to 2.7.8 and version cadence to 1.1.0
+- (Dan) Updates ruby to 2.7.8 and version cadence to 1.1.0
 
 ## 1.0.4-rc01 - 2023-08
 
