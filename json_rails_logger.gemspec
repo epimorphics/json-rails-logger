@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email       = 'info@epimorphics.com'
   spec.homepage    = 'https://github.com/epimorphics/json-rails-logger'
   spec.license     = 'MIT'
-  spec.required_ruby_version = '>= 2.6'
+  spec.required_ruby_version = '>= 3.0.0'
 
   spec.metadata = {
     'github_repo' => 'git@github.com:epimorphics/json-rails-logger.git',
