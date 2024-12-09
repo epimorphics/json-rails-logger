@@ -62,7 +62,7 @@ module JsonRailsLogger
         level: sev
       }
 
-      payload.merge!(query_string.to_h)
+      payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h.except!(:optional).compact)
 
@@ -89,7 +89,7 @@ module JsonRailsLogger
 
     def query_string
       query_string = Thread.current[JsonRailsLogger::QUERY_STRING]
-      { query_string: query_string } if query_string
+      { query_string: query_string } if query_string.present?
     end
 
     def process_message(raw_msg)
