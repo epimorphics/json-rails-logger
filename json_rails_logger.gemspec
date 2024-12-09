@@ -27,9 +27,9 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'json', '~> 2.0'
-  spec.add_runtime_dependency 'lograge', '~> 0.11'
-  spec.add_runtime_dependency 'railties', '~> 7.0'
+  spec.add_dependency 'json'
+  spec.add_dependency 'lograge'
+  spec.add_dependency 'railties', '~> 7.0'
 
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rubocop', '~> 1.25.0'
