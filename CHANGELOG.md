@@ -1,5 +1,14 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.0.0 - 2024-12
+
+- (Jon) Updated the gemspec for the required ruby version to 3.0.0 to ensure the
+  gem is up to date with the latest ruby version
+- (Jon) Updated the gemspec to ensure the railties gem is locked to the 7.0 rails
+  version to avoid any potential issues with the gem being used
+- (Jon) Updated the logging to include the `request_id` in the JSON output to
+  ensure the values are always logged to the system tooling.
+
 ## 1.1.1 - 2024-10
 
 - (Jon) Updated the exposed keys to allow more flexibility in the logging
