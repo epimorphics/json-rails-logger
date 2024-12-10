@@ -1,5 +1,9 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.0.1 - 2024-12
+
+- (Bogdan) Regenerated `Gemfile.lock`
+
 ## 2.0.0 - 2024-12
 
 - (Jon) Updated the gemspec for the required ruby version to 3.0.0 to ensure the
