@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email       = 'info@epimorphics.com'
   spec.homepage    = 'https://github.com/epimorphics/json-rails-logger'
   spec.license     = 'MIT'
-  spec.required_ruby_version = '>= 2.6'
+  spec.required_ruby_version = '>= 3.0.0'
 
   spec.metadata = {
     'github_repo' => 'git@github.com:epimorphics/json-rails-logger.git',
@@ -27,10 +27,7 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'json', '~> 2.0'
-  spec.add_runtime_dependency 'lograge', '~> 0.11'
-  spec.add_runtime_dependency 'railties', '~> 6.0'
-
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rubocop', '~> 1.25.0'
+  spec.add_dependency 'json'
+  spec.add_dependency 'lograge'
+  spec.add_dependency 'railties', '~> 7.0'
 end
