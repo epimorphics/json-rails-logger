@@ -1,12 +1,16 @@
 # Changelog for the JSON Rails Logger gem
 
-## 2.0.1 - 2025-02
+## 2.0.2 - 2025-02
 
 - (Jon) Added new required keys for logging: message, method, path, etc.
 - (Jon) Moved some keys to optional and updated their handling.
 - (Jon) Improved payload formatting based on log severity in development.
 - (Jon) Introduced a new method for fetching request parameters.
 - (Jon) Enhanced duration normalisation logic.
+
+## 2.0.1 - 2024-12
+
+- (Bogdan) Regenerated `Gemfile.lock`
 
 ## 2.0.0 - 2024-12
 
