@@ -56,7 +56,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should correctly format the timestamp' do
-    message = "[Webpacker] Everything's up-to-date. Nothing to do"
+    message = "Everything's up-to-date. Nothing to do"
 
     log_output = fixture.call('INFO', timestamp, progname, message)
     _(log_output).must_be_kind_of(String)
@@ -80,7 +80,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should correctly add the request id to returning json' do
-    message = "[Webpacker] Everything's up-to-date. Nothing to do"
+    message = "Everything's up-to-date. Nothing to do"
     request_id_fixture = { 'request_id' => 'example-8a3fb0-request-30dgh0e-id' }
 
     fixture.stub :request_id, request_id_fixture do
