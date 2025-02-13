@@ -29,5 +29,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'json'
   spec.add_dependency 'lograge'
-  spec.add_dependency 'railties', '~> 7.0'
+  spec.add_dependency 'railties'
 end

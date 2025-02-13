@@ -6,6 +6,7 @@ module JsonRailsLogger
   EXCEPTION = :exception
   MESSAGE = :message
   METHOD = :method
+  PARAMS = :request_params # Alias for REQUEST_PARAMS
   PATH = :request_path # Alias for REQUEST_PATH
   QUERY_STRING = :query_string
   REQUEST_ID = :request_id
@@ -14,6 +15,7 @@ module JsonRailsLogger
   REQUEST_STATUS = :request_status
   REQUEST_URI = :request_uri
   STATUS = :status
+  USER_AGENT = :user_agent
   # * THE FOLLOWING ARE NOT CURRENTLY USED BUT AVAILABLE FOR USE * #
   # ACCEPT = :accept
   # ACTION = :action
@@ -42,5 +44,4 @@ module JsonRailsLogger
   # SERVER_PORT = :server_port
   # SERVER_PROTOCOL = :server_protocol
   # SERVER_SOFTWARE = :server_software
-  # USER_AGENT = :user_agent
 end
