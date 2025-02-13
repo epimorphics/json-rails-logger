@@ -5,6 +5,7 @@ module JsonRailsLogger
   class JsonFormatter < ::Logger::Formatter # rubocop:disable Metrics/ClassLength
     ## Required keys to be logged to the output
     REQUIRED_KEYS = %w[
+      accept
       backtrace
       body
       duration
@@ -23,7 +24,6 @@ module JsonRailsLogger
 
     ## Optional keys to be ignored from the output for the time being
     OPTIONAL_KEYS = %w[
-      accept
       action
       encoding
       exception
