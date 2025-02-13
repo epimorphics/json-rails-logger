@@ -82,18 +82,7 @@ module JsonRailsLogger
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.to_h.except!(:optional).compact)
 
-      if Rails.env.development?
-        case sev
-        when 'ERROR'
-          "\e[41m#{payload.to_json}\e[0m\n"
-        when 'WARN'
-          "\e[43m#{payload.to_json}\e[0m\n"
-        else
-          "\e[32m#{payload.to_json}\e[0m\n"
-        end
-      else
-        "#{payload.to_json}\n"
-      end
+      "#{payload.to_json}\n"
     end
     # rubocop:enable Metrics/MethodLength
 
