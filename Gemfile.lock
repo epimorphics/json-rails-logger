@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    json_rails_logger (2.0.1)
+    json_rails_logger (2.0.2)
       json
       lograge
-      railties (~> 7.0)
+      railties
 
 GEM
   remote: https://rubygems.org/
