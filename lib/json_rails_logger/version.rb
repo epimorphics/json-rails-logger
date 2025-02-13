@@ -5,5 +5,5 @@ module JsonRailsLogger
   MINOR = 0
   PATCH = 2
   SUFFIX = nil
-  VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}#{SUFFIX && "-#{SUFFIX}"}"
+  VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}#{SUFFIX && "-#{SUFFIX}"}".freeze
 end
