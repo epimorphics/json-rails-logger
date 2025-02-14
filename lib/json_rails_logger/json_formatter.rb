@@ -69,13 +69,15 @@ module JsonRailsLogger
       #   puts "\e[33m> formatted msg: #{new_msg}\e[0m\n\n"
       # end
 
-      # ! DO NOT DISPLAY THIS MESSAGE FROM WEBPACKER
-      return nil if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
-
       payload = {
         ts: timestp,
         level: sev
       }
+
+      # !SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
+      if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
+        payload[:level] = 'DEBUG'
+      end
 
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
