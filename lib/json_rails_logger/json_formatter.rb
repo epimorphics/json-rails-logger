@@ -78,6 +78,14 @@ module JsonRailsLogger
       if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
         payload[:level] = 'DEBUG'
       end
+      if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
+        message = "Completed#{format(' %s', new_msg[:optional]['action'])} action"
+        message += " for #{new_msg[:optional]['controller']}"
+        message += format(', time taken: %.0f ms', new_msg[:request_time])
+        new_msg[:message] = message
+        new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
+        payload[:level] = 'DEBUG'
+      end
 
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
