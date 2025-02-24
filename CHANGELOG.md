@@ -1,6 +1,6 @@
 # Changelog for the JSON Rails Logger gem
 
-## 2.0.2 - 2025-02
+## 2.0.3 - 2025-02
 
 - (Jon) Added detailed logging for completed actions, including the action name,
   controller, and request time. Updated log level to 'DEBUG' for these messages
@@ -12,6 +12,9 @@
   consistency and usability.
 - (Jon) Updated logging level for Webpacker messages to DEBUG for additional
   filtering capability
+
+## 2.0.2 - 2025-02
+
 - (Jon) Added new required keys for logging: message, method, path, etc.
 - (Jon) Moved some keys to optional and updated their handling.
 - (Jon) Improved payload formatting based on log severity in development.
