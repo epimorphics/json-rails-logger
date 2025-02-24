@@ -2,6 +2,16 @@
 
 ## 2.0.2 - 2025-02
 
+- (Jon) Added detailed logging for completed actions, including the action name,
+  controller, and request time. Updated log level to 'DEBUG' for these messages
+  if not already set.
+- (Jon) Changed how new messages are merged into the payload by sorting them
+  before excluding optional fields. This should help maintain a consistent order
+  in the logged output.
+- (Jon) Changed the message formatting to transform keys into symbols for better
+  consistency and usability.
+- (Jon) Updated logging level for Webpacker messages to DEBUG for additional
+  filtering capability
 - (Jon) Added new required keys for logging: message, method, path, etc.
 - (Jon) Moved some keys to optional and updated their handling.
 - (Jon) Improved payload formatting based on log severity in development.
@@ -16,8 +26,8 @@
 
 - (Jon) Updated the gemspec for the required ruby version to 3.0.0 to ensure the
   gem is up to date with the latest ruby version
-- (Jon) Updated the gemspec to ensure the railties gem is locked to the 7.0 rails
-  version to avoid any potential issues with the gem being used
+- (Jon) Updated the gemspec to ensure the railties gem is locked to the 7.0
+  rails version to avoid any potential issues with the gem being used
 - (Jon) Updated the logging to include the `request_id` in the JSON output to
   ensure the values are always logged to the system tooling.
 
@@ -25,8 +35,8 @@
 
 - (Jon) Updated the exposed keys to allow more flexibility in the logging
 - (Jon) Merged the two GitHub actions into one to reduce the number of actions
-  required to maintain the gem, while introducing dependency on successful linting
-  and tests before the gem is published
+  required to maintain the gem, while introducing dependency on successful
+  linting and tests before the gem is published
 
 ## 1.1.0 - 2024-10
 
