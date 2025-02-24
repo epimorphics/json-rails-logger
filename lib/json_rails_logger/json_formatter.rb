@@ -82,7 +82,7 @@ module JsonRailsLogger
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
-      payload.merge!(new_msg.to_h.except!(:optional).compact)
+      payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
 
       "#{payload.to_json}\n"
     end
