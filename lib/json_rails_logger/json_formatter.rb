@@ -61,7 +61,7 @@ module JsonRailsLogger
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
-      new_msg = format_message(msg)
+      new_msg = format_message(msg).transform_keys(&:to_sym)
 
       # if Rails.logger.debug?
       #   puts "\n\e[31m> received raw_msg: #{raw_msg}\e[0m"
