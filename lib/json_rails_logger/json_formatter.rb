@@ -57,7 +57,7 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize
+    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
