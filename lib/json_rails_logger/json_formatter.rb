@@ -57,30 +57,43 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize
+    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
-      new_msg = format_message(msg)
+      new_msg = format_message(msg).transform_keys(&:to_sym)
 
+      # * Uncomment to print out the raw, processed and formatted messages to the console
       # if Rails.logger.debug?
-      #   puts "\n\e[31m> received raw_msg: #{raw_msg}\e[0m"
+      #   puts "\n\e[41m> received raw_msg: #{raw_msg}\e[0m"
       #   puts "\e[32m> processed msg: #{msg}\e[0m"
-      #   puts "\e[33m> formatted msg: #{new_msg}\e[0m\n\n"
+      #   puts "\e[33m> formatted new msg: #{new_msg}\e[0m\n\n"
       # end
-
-      # ! DO NOT DISPLAY THIS MESSAGE FROM WEBPACKER
-      return nil if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
 
       payload = {
         ts: timestp,
         level: sev
       }
 
+      # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
+      if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
+        payload[:level] = 'DEBUG'
+      end
+
+      # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
+      if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
+        message = "Completed#{format(' %s', new_msg[:optional]['action'])} action"
+        message += " for #{new_msg[:optional]['controller']}"
+        message += format(', time taken: %.0f ms', new_msg[:request_time])
+        new_msg[:message] = message
+        new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
+        payload[:level] = 'DEBUG'
+      end
+
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
-      payload.merge!(new_msg.to_h.except!(:optional).compact)
+      payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
 
       "#{payload.to_json}\n"
     end
