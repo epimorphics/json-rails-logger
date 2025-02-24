@@ -2,6 +2,8 @@
 
 ## 2.0.3 - 2025-02
 
+- (Jon) Added pre-commit and pre-push hooks to the gem to ensure the code is
+  linted and tested before being committed or pushed to the repository.
 - (Jon) Added detailed logging for completed actions, including the action name,
   controller, and request time. Updated log level to 'DEBUG' for these messages
   if not already set.
