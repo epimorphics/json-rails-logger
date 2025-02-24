@@ -3,7 +3,7 @@
 module JsonRailsLogger
   MAJOR = 2
   MINOR = 0
-  PATCH = 2
+  PATCH = 3
   SUFFIX = nil
   VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}#{SUFFIX && "-#{SUFFIX}"}".freeze
 end
