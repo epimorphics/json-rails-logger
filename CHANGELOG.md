@@ -1,7 +1,11 @@
 # Changelog for the JSON Rails Logger gem
 
-## 2.0.3 - 2025-02
+## 2.0.3 - 2025-03
 
+- (Jon) Enhance logging with request time formatting
+  - Added conditional check for request time presence
+  - Improved request time format to include seconds and milliseconds
+  - Updated log message structure for clarity
 - (Jon) Added pre-commit and pre-push hooks to the gem to ensure the code is
   linted and tested before being committed or pushed to the repository.
 - (Jon) Added detailed logging for completed actions, including the action name,
