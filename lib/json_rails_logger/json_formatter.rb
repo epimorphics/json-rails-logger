@@ -57,7 +57,7 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
       msg = process_message(raw_msg)
@@ -84,7 +84,11 @@ module JsonRailsLogger
       if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
         message = "Completed#{format(' %s', new_msg[:optional]['action'])} action"
         message += " for #{new_msg[:optional]['controller']}"
-        message += format(', time taken: %.0f ms', new_msg[:request_time])
+        if new_msg[:request_time].present?
+          message += format(', time taken: %.0f ms', new_msg[:request_time])
+          seconds, milliseconds = new_msg[:request_time].divmod(1000)
+          new_msg[:request_time] = format('%.0f.%04d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
+        end
         new_msg[:message] = message
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
         payload[:level] = 'DEBUG'
