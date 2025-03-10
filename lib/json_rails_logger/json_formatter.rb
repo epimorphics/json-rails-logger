@@ -87,7 +87,7 @@ module JsonRailsLogger
         if new_msg[:request_time].present?
           message += format(', time taken: %.0f ms', new_msg[:request_time])
           seconds, milliseconds = new_msg[:request_time].divmod(1000)
-          new_msg[:request_time] = format('%.0f.%04d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
+          new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
         end
         new_msg[:message] = message
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
