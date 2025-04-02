@@ -1,5 +1,18 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.0.4 - 2025-04
+
+- (Jon) Extracted the optional messages and `request_time` formatting logic to
+  improve readability and maintainability.
+- (Jon) Added a new method `process_optional_messages` to handle the formatting
+  of the optional messages.
+- (Jon) Updated the `call` method to include the new `process_optional_messages`
+  method, ensuring that the optional messages are processed correctly.
+- (Jon) Separated the request time formatting into its own block to improve
+  readability and maintainability.
+- (Jon) Updated .rubocop.yml to ignore long comments to reduce noise in the CI/CD
+  pipeline
+
 ## 2.0.3 - 2025-03
 
 - (Jon) Enhance logging with request time formatting
