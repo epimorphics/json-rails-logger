@@ -82,16 +82,16 @@ module JsonRailsLogger
 
       # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
       if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
-        message = "Completed#{format(' %s', new_msg[:optional]['action'])} action"
-        message += " for #{new_msg[:optional]['controller']}"
-        if new_msg[:request_time].present?
-          message += format(', time taken: %.0f ms', new_msg[:request_time])
-          seconds, milliseconds = new_msg[:request_time].divmod(1000)
-          new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
-        end
-        new_msg[:message] = message
+        new_msg[:message] = process_optional_messages(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
         payload[:level] = 'DEBUG'
+      end
+
+      # * Add the request time to the message if it is present and does not already contain it
+      if new_msg[:request_time].present? && new_msg[:message].exclude?(', time taken:')
+        new_msg[:message] += format(', time taken: %.0f ms', new_msg[:request_time])
+        seconds, milliseconds = new_msg[:request_time].divmod(1000)
+        new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
       end
 
       payload.merge!(query_string.to_h) unless query_string.nil?
@@ -144,6 +144,21 @@ module JsonRailsLogger
       { message: msg.squish }
     end
 
+    def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize
+      tmp_msg = msg[:message]
+
+      if msg[:optional]['action'].present? && msg[:optional]['controller'].present?
+        tmp_msg = "Completed#{format(' %s', msg[:optional]['action'])} action"
+        tmp_msg += " for #{msg[:optional]['controller']}"
+      end
+
+      if msg[:optional]['request_uri'].present?
+        tmp_msg.insert(tmp_msg.index(','), format(' to %s', msg[:optional]['request_uri']))
+      end
+
+      tmp_msg
+    end
+
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def format_message(msg)
       new_msg = { optional: {} }
@@ -169,6 +184,9 @@ module JsonRailsLogger
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
+    # Check if the message is a hash with a single key :message with a string value
+    # @param msg [Hash] the message to check
+    # @return [Boolean] true if the message is a hash with a single key :message with a string value, false otherwise
     def string_message_field?(msg)
       msg.is_a?(Hash) &&
         msg.length == 1 &&
