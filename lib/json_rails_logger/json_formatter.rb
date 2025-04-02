@@ -88,7 +88,7 @@ module JsonRailsLogger
       end
 
       # * Add the request time to the message if it is present and does not already contain it
-      if new_msg[:request_time].present? && new_msg[:message].exclude?(', time taken:')
+      if new_msg[:request_time].present? && new_msg[:message].present? && new_msg[:message].exclude?(', time taken:') # rubocop:disable Layout/LineLength
         new_msg[:message] += format(', time taken: %.0f ms', new_msg[:request_time])
         seconds, milliseconds = new_msg[:request_time].divmod(1000)
         new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
