@@ -13,6 +13,7 @@ module JsonRailsLogger
       method
       path
       query_string
+      returned_rows
       request_id
       request_params
       request_path
