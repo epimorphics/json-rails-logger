@@ -1,5 +1,12 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.0.5 - 2025-04
+
+- (Jon) Added a new method `remove_unprintable_characters` to filter out
+  unprintable and non-ASCII characters from log messages.
+- (Jon) Updated the `call` method to include the new `remove_unprintable_characters`
+  method, ensuring that log messages are cleaned before being logged.
+
 ## 2.0.4 - 2025-04
 
 - (Jon) Extracted the optional messages and `request_time` formatting logic to
