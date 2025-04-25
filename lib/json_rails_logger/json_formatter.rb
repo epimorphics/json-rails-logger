@@ -138,11 +138,25 @@ module JsonRailsLogger
       return request_type(msg) if request_type?(msg)
       return user_agent_message(msg) if user_agent_message?(msg)
 
+      # Clean up the message if it contains special characters
+      msg = remove_unprintable_characters(msg)
+
       # squish is better than strip as it still returns the string, but first
       # removing all whitespace on both ends of the string, and then changing
       # remaining consecutive whitespace groups into one space each. strip only
       # removes white spaces only at the leading and trailing ends.
       { message: msg.squish }
+    end
+
+    def remove_unprintable_characters(msg)
+      # Remove ANSI escape codes
+      msg = msg.gsub(/\e\[[0-9;]*m/, '') if msg.match?(/\e\[[0-9;]*m/)
+      # Remove all non-printable characters
+      msg = msg.gsub(/[^[:print:]]/, '') if msg.match?(/[^[:print:]]/)
+      # Remove all non-ASCII characters
+      msg = msg.gsub(/[^\x00-\x7F]/, '') if msg.match?(/[^\x00-\x7F]/)
+
+      msg
     end
 
     def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize
