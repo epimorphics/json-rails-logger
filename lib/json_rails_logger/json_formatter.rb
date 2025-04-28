@@ -107,7 +107,14 @@ module JsonRailsLogger
     private
 
     def process_severity(severity)
-      { 'FATAL' => 'ERROR' }[severity] || severity
+      case severity
+      when 0, 'DEBUG', 'TRACE' then 'DEBUG'
+      when 1, 'INFO' then 'INFO'
+      when 2, 'WARN' then 'WARN'
+      when 3, 'ANY', 'UNKNOWN', 'CRITICAL', 'FATAL', 'ERROR' then 'ERROR'
+      else
+        severity
+      end
     end
 
     def process_timestamp(timestamp)
