@@ -3,6 +3,8 @@
 module JsonRailsLogger
   # This class is used to configure and setup lograge, as well as our gem
   class Railtie < Rails::Railtie
+    config.colorize_logging = false
+    config.lograge.keep_original_rails_log = false
     config.lograge.formatter = Lograge::Formatters::Json.new
     config.lograge.custom_options = lambda do |event|
       {
