@@ -77,8 +77,11 @@ module JsonRailsLogger
       }
 
       # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
+      # ! NOTE: This message may still be present in production due to the logging
+      # ! level not actually being set to debug but can still be filtered out
+      # ! by the elastic search filters
       if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
-        payload[:level] = 'DEBUG'
+        payload[:level] = process_severity(Logger::DEBUG)
       end
 
       # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
