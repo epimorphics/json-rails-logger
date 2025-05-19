@@ -159,6 +159,10 @@ module JsonRailsLogger
     end
 
     def process_message(raw_msg)
+      # If the message is nil, return an empty hash
+      return {} if raw_msg.nil?
+
+      # Otherwise, normalize the message
       msg = normalize_message(raw_msg)
 
       return msg unless msg.is_a?(String)
