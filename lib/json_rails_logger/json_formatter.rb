@@ -68,14 +68,14 @@ module JsonRailsLogger
 
       # * Uncomment to print out the raw, processed and formatted messages to the console
       # if Rails.logger.debug?
-      #   puts "\n\e[41m> received raw_msg: #{raw_msg}\e[0m"
-      #   puts "\e[32m> processed msg: #{msg}\e[0m"
-      #   puts "\e[33m> formatted new msg: #{new_msg}\e[0m\n\n"
+      #   puts "\n\e[41m> received #{severity} raw_msg at #{tmstmp}: #{raw_msg}\e[0m"
+      #   puts "\e[32m> processed #{severity} msg at #{tmstmp}: #{msg}\e[0m"
+      #   puts "\e[33m> formatted #{severity} new msg at #{tmstmp}: #{new_msg}\e[0m\n\n"
       # end
 
       payload = {
         ts: tmstmp,
-        level: sev
+        level: sev.ljust(5)
       }
 
       # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
@@ -90,7 +90,6 @@ module JsonRailsLogger
       if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
         new_msg[:message] = process_optional_messages(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
-        payload[:level] = 'DEBUG'
       end
 
       # * Add the request time to the message if it is present and does not already contain it
