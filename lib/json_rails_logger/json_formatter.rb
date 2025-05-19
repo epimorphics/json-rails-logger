@@ -58,10 +58,12 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
       timestp = process_timestamp(timestamp)
+      prgname = process_progname(progname)
       msg = process_message(raw_msg)
+      msg[:progname] = prgname if prgname
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
       # * Uncomment to print out the raw, processed and formatted messages to the console
@@ -122,6 +124,22 @@ module JsonRailsLogger
 
     def process_timestamp(timestamp)
       format_datetime(timestamp.utc)
+    end
+
+    # Process progname to remove the last space if it exists
+    # @param progname [String] - Program name to include in log messages.
+    # This is needed because the Rails logger adds a space at the end of the progname
+    # and we need to remove it to avoid having a space at the end of the JSON string
+    def process_progname(progname)
+      # If the progname is nil, return nil
+      return if progname.nil?
+
+      # Make sure the progname is a string
+      progname = progname.to_s
+      # Remove the last space if it exists
+      progname = progname[0..-2] if progname[-1] == ' '
+      # Return the progname
+      progname
     end
 
     def request_id
