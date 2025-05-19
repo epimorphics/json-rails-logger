@@ -60,7 +60,7 @@ module JsonRailsLogger
     # rubocop:disable Metrics/MethodLength
     def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
-      timestp = process_timestamp(timestamp)
+      tmstmp = process_timestamp(timestamp)
       prgname = process_progname(progname)
       msg = process_message(raw_msg)
       msg[:progname] = prgname if prgname
@@ -74,7 +74,7 @@ module JsonRailsLogger
       # end
 
       payload = {
-        ts: timestp,
+        ts: tmstmp,
         level: sev
       }
 
