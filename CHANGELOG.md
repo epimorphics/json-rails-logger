@@ -2,7 +2,8 @@
 
 ## 2.0.6 - 2025-05
 
-- (Jon) Improves severity level processing by mapping numeric and string levels to standard values.
+- (Jon) Improves severity level processing by mapping numeric and string levels
+  to standard values.
 - (Jon) Processes the program name and removes trailing spaces for valid JSON.
 - (Jon) Handles nil messages gracefully to prevent errors.
 - (Jon) Standardises Webpacker log level to DEBUG for filtering.
