@@ -1,11 +1,25 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.0.6 - 2025-05
+
+- (Jon) Improves severity level processing by mapping numeric and string levels
+  to standard values.
+- (Jon) Processes the program name and removes trailing spaces for valid JSON.
+- (Jon) Handles nil messages gracefully to prevent errors.
+- (Jon) Standardises Webpacker log level to DEBUG for filtering.
+- (Jon) Suppresses colourised output and original logs.
+- (Jon) Updates timestamp variable name for clarity.
+- (Jon) Adds progname to the logged message.
+- (Jon) Left-justifies the log level in the payload.
+- (Jon) Documents how to configure the custom JSON formatter.
+
 ## 2.0.5 - 2025-04
 
 - (Jon) Added a new method `remove_unprintable_characters` to filter out
   unprintable and non-ASCII characters from log messages.
-- (Jon) Updated the `call` method to include the new `remove_unprintable_characters`
-  method, ensuring that log messages are cleaned before being logged.
+- (Jon) Updated the `call` method to include the new
+  `remove_unprintable_characters` method, ensuring that log messages are cleaned
+  before being logged.
 
 ## 2.0.4 - 2025-04
 
@@ -17,8 +31,8 @@
   method, ensuring that the optional messages are processed correctly.
 - (Jon) Separated the request time formatting into its own block to improve
   readability and maintainability.
-- (Jon) Updated .rubocop.yml to ignore long comments to reduce noise in the CI/CD
-  pipeline
+- (Jon) Updated .rubocop.yml to ignore long comments to reduce noise in the
+  CI/CD pipeline
 
 ## 2.0.3 - 2025-03
 

@@ -58,34 +58,38 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, _progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
-      timestp = process_timestamp(timestamp)
+      tmstmp = process_timestamp(timestamp)
+      prgname = process_progname(progname)
       msg = process_message(raw_msg)
+      msg[:progname] = prgname if prgname
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
       # * Uncomment to print out the raw, processed and formatted messages to the console
       # if Rails.logger.debug?
-      #   puts "\n\e[41m> received raw_msg: #{raw_msg}\e[0m"
-      #   puts "\e[32m> processed msg: #{msg}\e[0m"
-      #   puts "\e[33m> formatted new msg: #{new_msg}\e[0m\n\n"
+      #   puts "\n\e[41m> received #{severity} raw_msg at #{tmstmp}: #{raw_msg}\e[0m"
+      #   puts "\e[32m> processed #{severity} msg at #{tmstmp}: #{msg}\e[0m"
+      #   puts "\e[33m> formatted #{severity} new msg at #{tmstmp}: #{new_msg}\e[0m\n\n"
       # end
 
       payload = {
-        ts: timestp,
-        level: sev
+        ts: tmstmp,
+        level: sev.ljust(5)
       }
 
       # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
+      # ! NOTE: This message may still be present in production due to the logging
+      # ! level not actually being set to debug but can still be filtered out
+      # ! by the elastic search filters
       if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
-        payload[:level] = 'DEBUG'
+        payload[:level] = process_severity(Logger::DEBUG)
       end
 
       # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
       if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
         new_msg[:message] = process_optional_messages(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
-        payload[:level] = 'DEBUG'
       end
 
       # * Add the request time to the message if it is present and does not already contain it
@@ -107,11 +111,34 @@ module JsonRailsLogger
     private
 
     def process_severity(severity)
-      { 'FATAL' => 'ERROR' }[severity] || severity
+      case severity
+      when 0, 'DEBUG', 'TRACE' then 'DEBUG'
+      when 1, 'INFO' then 'INFO'
+      when 2, 'WARN' then 'WARN'
+      when 3, 'ANY', 'UNKNOWN', 'CRITICAL', 'FATAL', 'ERROR' then 'ERROR'
+      else
+        severity
+      end
     end
 
     def process_timestamp(timestamp)
       format_datetime(timestamp.utc)
+    end
+
+    # Process progname to remove the last space if it exists
+    # @param progname [String] - Program name to include in log messages.
+    # This is needed because the Rails logger adds a space at the end of the progname
+    # and we need to remove it to avoid having a space at the end of the JSON string
+    def process_progname(progname)
+      # If the progname is nil, return nil
+      return if progname.nil?
+
+      # Make sure the progname is a string
+      progname = progname.to_s
+      # Remove the last space if it exists
+      progname = progname[0..-2] if progname[-1] == ' '
+      # Return the progname
+      progname
     end
 
     def request_id
@@ -131,6 +158,10 @@ module JsonRailsLogger
     end
 
     def process_message(raw_msg)
+      # If the message is nil, return an empty hash
+      return {} if raw_msg.nil?
+
+      # Otherwise, normalize the message
       msg = normalize_message(raw_msg)
 
       return msg unless msg.is_a?(String)
