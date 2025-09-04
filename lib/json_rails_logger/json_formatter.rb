@@ -104,7 +104,7 @@ module JsonRailsLogger
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
 
-      "#{payload.to_json.html_safe}\n"
+      "#{payload.to_json}\n"
     end
     # rubocop:enable Metrics/MethodLength
 
