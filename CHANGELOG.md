@@ -1,5 +1,15 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.1.0 - 2025-09
+
+- Updated ruby version and dependency versions to latest compatible releases
+- Added new development gems for rake task linting and debugging
+- Improved logging formatter logic for clearer and safer log output, removing
+  unsafe string concatenation
+- Refined log message format for action/controller outputs
+- Updated code comments for accuracy and clarity
+- Incremented version to reflect feature and refactor changes
+
 ## 2.0.6 - 2025-05
 
 - (Jon) Improves severity level processing by mapping numeric and string levels
