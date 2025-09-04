@@ -7,6 +7,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 group :development, :test do
-  gem 'rake', '~> 13.2', '>= 13.2.1'
-  gem 'rubocop', '~> 1.69', '>= 1.69.1'
+  gem 'rake'
+  gem 'rubocop'
+  gem 'rubocop-rake'
+  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
 end
