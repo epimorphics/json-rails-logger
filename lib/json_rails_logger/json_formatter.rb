@@ -104,7 +104,7 @@ module JsonRailsLogger
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
 
-      "#{payload.to_json}\n"
+      "#{payload.to_json.html_safe}\n"
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -147,7 +147,7 @@ module JsonRailsLogger
     end
 
     def query_string
-      query_string = Thread.current[JsonRailsLogger::QUERY_STRING]
+      query_string ||= Thread.current[JsonRailsLogger::QUERY_STRING]
       { query_string: query_string } if query_string.present?
     end
 
@@ -194,8 +194,8 @@ module JsonRailsLogger
       tmp_msg = msg[:message]
 
       if msg[:optional]['action'].present? && msg[:optional]['controller'].present?
-        tmp_msg = "Completed#{format(' %s', msg[:optional]['action'])} action"
-        tmp_msg += " for #{msg[:optional]['controller']}"
+        tmp_msg = "Completed#{format(' %s', msg[:optional]['action'])} action request"
+        tmp_msg += " for #{msg[:optional]['controller'].gsub('Controller', '')} Controller"
       end
 
       if msg[:optional]['request_uri'].present?
