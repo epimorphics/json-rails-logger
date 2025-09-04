@@ -5,12 +5,12 @@ module JsonRailsLogger
   class JsonFormatter < ::Logger::Formatter # rubocop:disable Metrics/ClassLength
     ## Required keys to be logged to the output
     REQUIRED_KEYS = %w[
-      accept
       backtrace
       body
       duration
       message
       method
+      params
       path
       query_string
       returned_rows
@@ -20,11 +20,11 @@ module JsonRailsLogger
       request_status
       request_time
       status
-      user_agent
     ].freeze
 
     ## Optional keys to be ignored from the output for the time being
     OPTIONAL_KEYS = %w[
+      accept
       action
       encoding
       exception
@@ -43,7 +43,6 @@ module JsonRailsLogger
       http_origin
       http_referer
       keep_alive
-      params
       remote_addr
       request_uri
       request_url
@@ -51,6 +50,7 @@ module JsonRailsLogger
       server_port
       server_protocol
       server_software
+      user_agent
       view
     ].freeze
 
