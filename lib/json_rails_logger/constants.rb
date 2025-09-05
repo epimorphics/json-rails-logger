@@ -16,7 +16,7 @@ module JsonRailsLogger
   REQUEST_URI = :request_uri
   STATUS = :status
   USER_AGENT = :user_agent
-  # * THE FOLLOWING ARE NOT CURRENTLY USED BUT AVAILABLE FOR USE * #
+  # * THE FOLLOWING ARE NOT CURRENTLY USED BUT AVAILABLE IF NEEDED * #
   # ACCEPT = :accept
   # ACTION = :action
   # AUTH = :auth
