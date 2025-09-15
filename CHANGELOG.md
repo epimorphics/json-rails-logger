@@ -1,5 +1,12 @@
 # Changelog for the JSON Rails Logger gem
 
+## 2.2.0 - 2025-09
+
+- Enhanced status and request type parsing logic
+- Added handling to skip formatting when optional data missing
+- Included checks for log message prefixes
+- Added debug log statements (commented out) for easier tracing
+
 ## 2.1.0 - 2025-09
 
 - Updated ruby version and dependency versions to latest compatible releases
