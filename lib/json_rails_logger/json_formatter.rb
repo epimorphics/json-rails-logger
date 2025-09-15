@@ -202,7 +202,7 @@ module JsonRailsLogger
         tmp_msg.insert(tmp_msg.index(','), format(' to %s', msg[:optional]['request_uri']))
       end
 
-      tmp_msg
+      tmp_msg if OPTIONAL_KEYS.any? { |key| msg[:optional].key?(key) }
     end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -248,25 +248,36 @@ module JsonRailsLogger
     end
 
     def status_message?(msg)
+      # puts "Checking for status message in: #{msg}" if Rails.logger.debug?
       msg.is_a?(String) &&
         msg.downcase.match(/status [0-9]+/)
     end
 
     def status_message(msg)
-      status = msg.split[1]
+      # puts "Found status message in: #{msg}" if Rails.logger.debug?
+      split_status = msg.split
+      # puts "Split status message: #{split_status}" if Rails.logger.debug?
+      is_status = split_status[0] == 'response:'
+      code = split_status[is_status ? 2 : 1]
+
+      status = code.to_i
 
       { status: status }
     end
 
     def request_type?(msg)
+      # puts "Checking for request type in: #{msg}" if Rails.logger.debug?
       msg.is_a?(String) &&
         REQUEST_METHODS.any? { |method| msg.match(/#{method} http\S+/) }
     end
 
     def request_type(msg)
-      splitted_msg = msg.split
-      method = splitted_msg[0]
-      path = splitted_msg[1]
+      # puts "Found request type in: #{msg}" if Rails.logger.debug?
+      split_type = msg.split
+      # puts "Split type: #{split_type}" if Rails.logger.debug?
+      is_request = split_type[0] == 'request:'
+      method = split_type[is_request ? 1 : 0]
+      path = split_type[is_request ? 2 : 1]
       { method: method, path: path }
     end
 
