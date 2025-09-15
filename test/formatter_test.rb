@@ -29,7 +29,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['status']).must_equal('200')
+    _(json_output['status']).must_equal(200)
   end
 
   it 'should parse method and path for requests' do
