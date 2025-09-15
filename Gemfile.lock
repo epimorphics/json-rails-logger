@@ -10,7 +10,7 @@ GIT
 PATH
   remote: .
   specs:
-    json_rails_logger (2.1.0)
+    json_rails_logger (2.2.0)
       json
       lograge
       railties
