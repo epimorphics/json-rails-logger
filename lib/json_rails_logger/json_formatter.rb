@@ -154,7 +154,7 @@ module JsonRailsLogger
     def request_params
       request_params = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
       request_params ||= Thread.current[JsonRailsLogger::PARAMS]
-      { query_string: request_params } if request_params.present? && query_string.empty
+      { request_params: request_params } if request_params.present? && query_string.blank?
     end
 
     def process_message(raw_msg)
