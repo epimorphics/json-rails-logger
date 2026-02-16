@@ -194,8 +194,9 @@ module JsonRailsLogger
       tmp_msg = msg[:message]
 
       if msg[:optional]['action'].present? && msg[:optional]['controller'].present?
-        tmp_msg = "Completed#{format(' %s', msg[:optional]['action'])} action request"
-        tmp_msg += " for #{msg[:optional]['controller'].gsub('Controller', '')} Controller"
+        tmp_msg = "Completed request for #{msg[:path]}"
+        tmp_msg += " with the #{msg[:optional]['controller'].gsub('Controller', '')} Controller"
+        tmp_msg += " #{msg[:optional]['action']} action"
       end
 
       if msg[:optional]['request_uri'].present?
