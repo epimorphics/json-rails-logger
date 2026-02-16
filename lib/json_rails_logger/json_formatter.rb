@@ -8,6 +8,7 @@ module JsonRailsLogger
       backtrace
       body
       duration
+      level
       message
       method
       params
@@ -64,6 +65,7 @@ module JsonRailsLogger
       prgname = process_progname(progname)
       msg = process_message(raw_msg)
       msg[:progname] = prgname if prgname
+      msg[:level] = sev.ljust(5)
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
       # * Uncomment to print out the raw, processed and formatted messages to the console
@@ -73,10 +75,8 @@ module JsonRailsLogger
       #   puts "\e[33m> formatted #{severity} new msg at #{tmstmp}: #{new_msg}\e[0m\n\n"
       # end
 
-      payload = {
-        ts: tmstmp,
-        level: sev.ljust(5)
-      }
+      # * Start building the payload with the timestamp and then merge in the other fields as they are processed
+      payload = { ts: tmstmp }
 
       # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
       # ! NOTE: This message may still be present in production due to the logging
@@ -220,7 +220,8 @@ module JsonRailsLogger
       if split_msg[0].empty?
         split_msg = msg.partition { |k, _v| OPTIONAL_KEYS.include?(k.to_s) }.map(&:to_h)
       end
-
+      # ensure the log level is appropriately set based on the status code
+      split_msg[0] = normalise_level(split_msg[0])
       # Check if the message contains a duration key and normalise it
       split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
 
@@ -312,5 +313,24 @@ module JsonRailsLogger
         end
       end
     end
+
+    # Verify the status of the request and refactor the log level
+    def normalise_level(msg) # rubocop:disable Metrics/MethodLength
+      status = msg[:status] || msg['status']
+      msg.to_h do |k, v|
+        if k.to_s == 'level'
+          level = case status.to_i
+                  when 100..399 then process_severity(Logger::INFO)
+                  when 400..499 then process_severity(Logger::WARN)
+                  when 500..599 then process_severity(Logger::ERROR)
+                  else process_severity(Logger::DEBUG)
+                  end
+          [:level, level]
+        else
+          [k, v]
+        end
+      end
+    end
+
   end
 end
