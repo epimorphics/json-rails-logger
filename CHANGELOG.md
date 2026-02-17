@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic
 Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02
+
+### Added
+
+- Added automatic log level normalisation based on HTTP status codes.
+- Added test coverage reporting via SimpleCov.
+
+### Changed
+
+- Included log level in required log fields for consistent output.
+- Updated request completion messages to include path, controller, and action.
+- Simplified payload assembly to build from timestamp before merging fields.
+
+### Fixed
+
+- Fixed request params being logged under the wrong key.
+- Fixed request time formatting when milliseconds are provided as floats.
+- Fixed query string handling when it is missing to avoid errors.
+
 ## [2.2.0] - 2025-09
 
 ### Added
