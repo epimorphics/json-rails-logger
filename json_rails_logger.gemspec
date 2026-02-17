@@ -27,6 +27,9 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
+  # Runtime dependencies for this gem are ALSO included in the Gemfile's
+  # :maintenance group to allow bundler to validate when running the `bundle
+  # outdated --only-explicit` from the `make update` target.
   spec.add_dependency 'json'
   spec.add_dependency 'lograge'
   spec.add_dependency 'railties'
