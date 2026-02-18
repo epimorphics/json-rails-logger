@@ -320,10 +320,11 @@ module JsonRailsLogger
       msg.to_h do |k, v|
         if k.to_s == 'level'
           level = case status.to_i
-                  when 100..399 then process_severity(Logger::INFO)
-                  when 400..499 then process_severity(Logger::WARN)
                   when 500..599 then process_severity(Logger::ERROR)
-                  else process_severity(Logger::DEBUG)
+                  when 400..499 then process_severity(Logger::WARN)
+                  when 100..399 then process_severity(Logger::INFO)
+                  # If the status code is not present or does not match any of the above ranges, keep the original level
+                  else v
                   end
           [:level, level]
         else
