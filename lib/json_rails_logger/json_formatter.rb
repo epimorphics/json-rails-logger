@@ -199,11 +199,9 @@ module JsonRailsLogger
 
     def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize
       tmp_msg = msg[:message]
-
       if msg[:optional]['action'].present? && msg[:optional]['controller'].present?
-        tmp_msg = "Completed request for #{msg[:path]}"
-        tmp_msg += " with the #{msg[:optional]['controller'].gsub('Controller', '')} Controller"
-        tmp_msg += " #{msg[:optional]['action']} action"
+        tmp_msg = msg[:optional]['controller'].gsub('Controller', '').to_s.capitalize
+        tmp_msg += " #{msg[:optional]['action']} request complete"
       end
 
       if msg[:optional]['request_uri'].present?
