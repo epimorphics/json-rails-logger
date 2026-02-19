@@ -81,14 +81,18 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
   it 'should correctly add the request id to returning json' do
     message = "Everything's up-to-date. Nothing to do"
-    request_id_fixture = { 'request_id' => 'example-8a3fb0-request-30dgh0e-id' }
+    request_id_fixture = 'example-8a3fb0-request-30dgh0e-id'
 
-    fixture.stub :request_id, request_id_fixture do
+    begin
+      Thread.current[JsonRailsLogger::REQUEST_ID] = request_id_fixture
+
       log_output = fixture.call('INFO', timestamp, progname, message)
       _(log_output).must_be_kind_of(String)
 
       json_output = JSON.parse(log_output)
-      _(json_output['request_id']).must_equal(request_id_fixture['request_id'])
+      _(json_output['request_id']).must_equal(request_id_fixture)
+    ensure
+      Thread.current[JsonRailsLogger::REQUEST_ID] = nil
     end
   end
 
