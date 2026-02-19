@@ -58,6 +58,10 @@ module JsonRailsLogger
     ## Request methods to check for in the message
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
+    def initialize(include_optional: false)
+      @include_optional = include_optional
+    end
+
     # rubocop:disable Metrics/MethodLength
     def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
@@ -103,6 +107,7 @@ module JsonRailsLogger
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
       payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
+      payload.merge!(new_msg[:optional]) if @include_optional && new_msg[:optional].present?
 
       # * Reorder so ts and level come first after all processing is done
       final_payload = {

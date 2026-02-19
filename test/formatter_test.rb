@@ -4,7 +4,7 @@ require './test/test_helper'
 
 describe 'JsonRailsLogger::JsonFormatter' do
   let(:fixture) do
-    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter = JsonRailsLogger::JsonFormatter.new(include_optional: true)
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     formatter
   end
