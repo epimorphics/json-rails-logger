@@ -65,7 +65,7 @@ module JsonRailsLogger
       prgname = process_progname(progname)
       msg = process_message(raw_msg)
       msg[:progname] = prgname if prgname
-      msg[:level] = sev.ljust(5)
+      msg[:level] = sev.ljust(5).squish if sev
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
       # * Uncomment to print out the raw, processed and formatted messages to the console
