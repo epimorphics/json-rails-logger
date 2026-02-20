@@ -10,17 +10,28 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Made optional fields configurable via `include_optional` initialiser parameter
+  (defaults to `false` for backward compatibility).
+- Added test coverage for optional field inclusion modes (enabled/disabled
+  configurations).
 - Added automatic log level normalisation based on HTTP status codes.
 - Added test coverage reporting via SimpleCov.
 
 ### Changed
 
+- Restructured JSON payload assembly to prioritise `ts` and `level` fields at
+  output.
+- Simplified request completion messages to use single-line format with
+  controller and action.
 - Included log level in required log fields for consistent output.
 - Updated request completion messages to include path, controller, and action.
 - Simplified payload assembly to build from timestamp before merging fields.
 
 ### Fixed
 
+- Fixed log level assignment to handle nil severity values gracefully without
+  truncation errors.
+- Trimmed extraneous whitespace from log level field with `squish`.
 - Fixed request params being logged under the wrong key.
 - Fixed request time formatting when milliseconds are provided as floats.
 - Fixed query string handling when it is missing to avoid errors.
