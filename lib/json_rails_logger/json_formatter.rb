@@ -59,6 +59,7 @@ module JsonRailsLogger
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
     def initialize(include_optional: false)
+      super() # dont pass any arguments to the parent class as it does not expect any
       @include_optional = include_optional
     end
 
@@ -342,6 +343,5 @@ module JsonRailsLogger
         end
       end
     end
-
   end
 end
