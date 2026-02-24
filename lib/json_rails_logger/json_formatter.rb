@@ -138,6 +138,16 @@ module JsonRailsLogger
       format_datetime(timestamp.utc)
     end
 
+    def partition_message_by_keys(msg)
+      # First try to partition by required keys
+      split = msg.partition { |k, _v| REQUIRED_KEYS.include?(k.to_s) }.map(&:to_h)
+
+      # If no required keys found, try partitioning by optional keys instead
+      return split unless split[0].empty?
+
+      msg.partition { |k, _v| OPTIONAL_KEYS.include?(k.to_s) }.map(&:to_h)
+    end
+
     # Process progname to remove the last space if it exists
     # @param progname [String] - Program name to include in log messages.
     # This is needed because the Rails logger adds a space at the end of the progname
@@ -226,11 +236,7 @@ module JsonRailsLogger
       return new_msg.merge(msg) unless msg.is_a?(Enumerable)
 
       # If the message is a hash, check if it contains the required keys
-      split_msg = msg.partition { |k, _v| REQUIRED_KEYS.include?(k.to_s) }.map(&:to_h)
-      # If the returned hash is empty, check if the message is a hash with optional keys
-      if split_msg[0].empty?
-        split_msg = msg.partition { |k, _v| OPTIONAL_KEYS.include?(k.to_s) }.map(&:to_h)
-      end
+      split_msg =  partition_message_by_keys(msg)
       # ensure the log level is appropriately set based on the status code
       split_msg[0] = normalise_level(split_msg[0])
       # Check if the message contains a duration key and normalise it
