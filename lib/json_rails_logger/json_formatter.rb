@@ -8,10 +8,11 @@ module JsonRailsLogger
       backtrace
       body
       duration
+      exception
+      exception_object
       level
       message
       method
-      params
       path
       query_string
       returned_rows
@@ -27,9 +28,9 @@ module JsonRailsLogger
     OPTIONAL_KEYS = %w[
       accept
       action
+      controller
+      db
       encoding
-      exception
-      exception_object
       format
       forwarded_for
       gateway
@@ -44,6 +45,7 @@ module JsonRailsLogger
       http_origin
       http_referer
       keep_alive
+      params
       remote_addr
       request_uri
       request_url
@@ -284,18 +286,24 @@ module JsonRailsLogger
       msg
     end
 
-    def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize
+    def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       tmp_msg = msg[:message]
-      if msg[:optional]['action'].present? && msg[:optional]['controller'].present?
-        tmp_msg = msg[:optional]['controller'].gsub('Controller', '').to_s.capitalize
-        tmp_msg += " #{msg[:optional]['action']} request complete"
+      optional = msg[:optional]
+
+      # Check for both string and symbol keys to handle different input formats
+      action = optional['action'] || optional[:action]
+      controller = optional['controller'] || optional[:controller]
+      request_uri = optional['request_uri'] || optional[:request_uri]
+
+      if action.present? && controller.present?
+        # Extract controller name: Api::TransformationsController → Transformations
+        controller_name = controller.to_s.gsub('Controller', '').split('::').last
+        tmp_msg = "#{controller_name} #{action} request complete"
       end
 
-      if msg[:optional]['request_uri'].present?
-        tmp_msg.insert(tmp_msg.index(','), format(' to %s', msg[:optional]['request_uri']))
-      end
+      tmp_msg.insert(tmp_msg.index(','), format(' to %s', request_uri)) if request_uri.present?
 
-      tmp_msg if OPTIONAL_KEYS.any? { |key| msg[:optional].key?(key) }
+      tmp_msg if OPTIONAL_KEYS.any? { |key| optional.key?(key) || optional.key?(key.to_sym) }
     end
 
     # rubocop:disable Metrics/AbcSize
@@ -391,10 +399,11 @@ module JsonRailsLogger
         msg.key?(:request_time)
     end
 
-    # If duration is a float, convert it to an integer as milliseconds µs -> ms
+    # If request_time is a float, convert it to an integer as milliseconds µs -> ms
+    # Duration is already in milliseconds from Lograge, so preserve it as-is
     def normalise_duration(msg)
       msg.to_h do |k, v|
-        if %w[duration request_time].include?(k.to_s) && v.is_a?(Float)
+        if k.to_s == 'request_time' && v.is_a?(Float)
           [:request_time, v.round(0)]
         else
           [k, v]
