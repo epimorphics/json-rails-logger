@@ -7,9 +7,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 group :maintenance do
-  gem 'json'
-  gem 'lograge'
-  gem 'railties'
+  gem 'json', '~> 2.3'
+  gem 'lograge', '~> 0.14'
+  gem 'railties', '~> 8.0'
 end
 
 group :development, :test do

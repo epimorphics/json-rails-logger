@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   # Runtime dependencies for this gem are ALSO included in the Gemfile's
   # :maintenance group to allow bundler to validate when running the `bundle
   # outdated --only-explicit` from the `make update` target.
-  spec.add_dependency 'json'
-  spec.add_dependency 'lograge'
-  spec.add_dependency 'railties'
+  spec.add_dependency 'json', '~> 2.3'
+  spec.add_dependency 'lograge', '~> 0.14'
+  spec.add_dependency 'railties', '~> 8.0'
 end

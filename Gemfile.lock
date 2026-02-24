@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     json_rails_logger (2.3.0)
-      json
-      lograge
-      railties
+      json (~> 2.3)
+      lograge (~> 0.14)
+      railties (~> 8.0)
 
 GEM
   remote: https://rubygems.org/
@@ -240,10 +240,10 @@ PLATFORMS
 DEPENDENCIES
   debug
   foreman
-  json
+  json (~> 2.3)
   json_rails_logger!
-  lograge
-  railties
+  lograge (~> 0.14)
+  railties (~> 8.0)
   rake
   rubocop
   rubocop-rake
