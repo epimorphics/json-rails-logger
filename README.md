@@ -31,8 +31,66 @@ end
 And this to your environment config (e.g. `config/environments/production.rb`):
 
 ```ruby
-config.logger = JsonRailsLogger::Logger.new(STDOUT)`
+config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
+
+## How It Works
+
+### Automatic Railtie Setup
+
+When `json_rails_logger` is required in your Gemfile, a Rails Railtie[^1]
+automatically initialises:
+
+1. **Middleware insertion**: The `RequestIdMiddleware` is inserted into your
+   middleware stack
+   - Automatically reads the HTTP `X-Request-ID` header (production) or
+     `action_dispatch.request_id` (development)
+   - Stores the request ID in thread-local storage for access during request
+     processing
+   - Cleans up after each request to prevent data leaking in thread pools
+
+2. **Lograge configuration**: If a `JsonRailsLogger::Logger` is configured,
+   Lograge is also set up to:
+   - Output all log lines in JSON format
+   - Include request exceptions in the JSON payload
+   - Disable Rails' default colourised logging
+
+### If You Don't Configure JsonRailsLogger
+
+If you add the gem to your Gemfile but **don't** configure it as your logger:
+
+- **Middleware still runs** (minimal overhead: just thread storage
+  assignment/cleanup)
+- **Lograge remains unconfigured** (Rails uses default logging)
+- **Request ID won't appear in logs** (middleware captures it, but not used
+  without configured logger)
+- **No breaking changes** (gem is safe to include without immediate
+  configuration)
+
+### Thread-Local Storage and Request IDs
+
+The request ID is stored in `Thread.current[JsonRailsLogger::REQUEST_ID]` for
+several reasons:
+
+- **Thread isolation**: Each request thread has its own request ID; no
+  cross-request pollution
+- **Automatic cleanup**: The ensure block in the middleware guarantees cleanup
+  even if exceptions occur
+- **No context passing**: The formatter and other components can read the
+  request ID without it being passed as a parameter
+
+### Configuring Optional Fields
+
+By default, optional fields (e.g. `user_agent`, `accept`, `controller`,
+`action`) are excluded from JSON output. To include them, configure the
+logger with the `include_optional` parameter:
+
+```ruby
+config.logger = JsonRailsLogger::Logger.new(STDOUT, include_optional: true)
+```
+
+This is useful during development or debugging when you want more detailed
+request information.
 
 ## GitHub package registry
 
@@ -97,3 +155,7 @@ To publish a new version of the gem after a bugfix or feature addition:
 Pushing a tagged version will automatically trigger the publish gem
 workflow, which should result in the gem appearing on the
 [list of releases](https://github.com/epimorphics/json-rails-logger/releases)
+
+---
+
+[^1]: <https://guides.rubyonrails.org/plugins.html#using-the-railtie> "Rails Guides: Using the Railtie – A Railtie is a mechanism to hook into Rails' initialization process, allowing gems to run setup code automatically when Rails boots"
