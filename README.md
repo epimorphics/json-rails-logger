@@ -120,7 +120,7 @@ See also notes on making a release of the gem, below.
 ## Developer notes
 
 After cloning the repo, first execute:\
-`bundle install`
+`make assets`
 
 Rubocop should produce no warnings.
 
