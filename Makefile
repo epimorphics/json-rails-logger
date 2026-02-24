@@ -1,4 +1,4 @@
-.PHONY: all assets auth build bundles check checks clean coverage gem help lint publish realclean rubocop tags test update vars
+.PHONY: all assets auth build bundles check checks clean coverage doc gem help lint publish realclean rubocop tags test update vars
 
 NAME?=json_rails_logger
 OWNER?=epimorphics
@@ -47,6 +47,12 @@ clean: ## Clean up generated gem package
 coverage: ## Display test coverage report
 	@open coverage/index.html
 	@echo "Displaying test coverage report in browser..."
+
+doc: ## Generate YARD API documentation
+	@yard doc
+	@open doc/index.html
+	@echo "Displaying API documentation generated in doc/index.html"
+	@echo "Available in IDE autocompletion (hover over methods in VS Code/RubyMine)"
 
 gem: ${GEM} ## Build the gem package
 	@echo ${GEM}
