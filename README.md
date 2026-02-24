@@ -1,10 +1,10 @@
-# JSON logger for Rails
+# JSON log formatter for Rails
 
-A custom rails logger that outputs JSON instead of raw text. The goal of this
-gem is to output log messages from Rails applications in a JSON format that
+A custom rails log formatter that outputs JSON instead of raw text. The goal of
+this gem is to output log messages from Rails applications in a JSON format that
 is consistent with the other applications that Epimorphics supports. Doing so
-makes the combined logs in ElasticSearch much more useful for diagnosis and
-other system administration tasks.
+makes the combined logs more useful for diagnosis and other system
+administration tasks.
 
 A particular feature of this logger is to output the `request_id` from the
 currently active HTTP request in every log.
@@ -119,8 +119,15 @@ See also notes on making a release of the gem, below.
 
 ## Developer notes
 
-After cloning the repo, first execute:\
-`make assets`
+After cloning the repo, to install all dependecies, first execute
+
+   make assets
+
+### Linting the code
+
+To check forrmatting and use, execute
+
+   make lint
 
 Rubocop should produce no warnings.
 
@@ -128,8 +135,15 @@ Rubocop should produce no warnings.
 
 Tests are located in the `./test/` folder.
 
-To run the tests, use:\
-`rake test`
+To run the tests, use
+
+   make test
+
+#### One step check
+
+You can also runs both linting and tests using
+
+   make check
 
 ### `Makefile`
 
@@ -140,6 +154,18 @@ To check that the gem will build correctly: `make build`
 To create the GitHub and Bundler authorisations: `make auth`
 
 To publish the gem to the GitHub package registry: `make publish`
+
+### API Documentation
+
+The gem includes comprehensive YARD documentation on all public methods:
+
+- **In your IDE**: Hover over `Logger.new` or `JsonFormatter.call` to see
+  parameter types and usage examples
+- **As HTML docs**: Run `make doc` to generate human-readable API reference in
+  `doc/index.html`
+
+This documentation includes parameter types, return values, example usage, and
+cross-references to Rails and Ruby stdlib documentation.
 
 ### Publishing a new version of the gem
 
