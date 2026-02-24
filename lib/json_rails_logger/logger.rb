@@ -8,9 +8,11 @@ module JsonRailsLogger
     # operations and monitoring tools
     #
     # +logdev+ The output device to send log messages to
-    def initialize(logdev)
+    # +include_optional+ Optional. Set to true to include optional fields (user_agent, accept, etc.)
+    #                    in JSON output. Defaults to false for backward compatibility.
+    def initialize(logdev, include_optional: false)
       # Set up the formatter to use our custom JSON formatter
-      formatter = JsonRailsLogger::JsonFormatter.new
+      formatter = JsonRailsLogger::JsonFormatter.new(include_optional: include_optional)
       # and set the datetime format to ISO 8601 with milliseconds and UTC timezone
       formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
       # Call the parent constructor with the logdev and formatter
