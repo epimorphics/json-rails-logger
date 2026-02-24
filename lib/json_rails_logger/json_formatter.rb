@@ -58,11 +58,82 @@ module JsonRailsLogger
     ## Request methods to check for in the message
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
+    # Initialises a JSON formatter for Rails logging
+    #
+    # The formatter is responsible for converting log messages into JSON format
+    # that includes extracted request metadata, status codes, user agent information,
+    # and other relevant fields for operational monitoring.
+    #
+    # @param include_optional [Boolean] Whether to include optional fields in formatted output.
+    #   When true, fields like user_agent, accept, controller, and action are included.
+    #   When false (default), only required fields are output. Set to true during
+    #   development or debugging for detailed request information.
+    #
+    # @return [JsonRailsLogger::JsonFormatter] A configured formatter instance
+    #
+    # @example Create formatter with optional fields
+    #   formatter = JsonRailsLogger::JsonFormatter.new(include_optional: true)
+    #   formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+    #
+    # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
     def initialize(include_optional: false)
       super() # dont pass any arguments to the parent class as it does not expect any
       @include_optional = include_optional
     end
 
+    # Formats a log message into JSON suitable for structured logging and analysis
+    #
+    # This is the primary method called by the Ruby Logger to format log output.
+    # It processes the severity, timestamp, and message into a single-line JSON
+    # string with automatically extracted request metadata (status codes, HTTP methods,
+    # user agents, request IDs, etc.). The formatter is designed to work with Rails
+    # controllers and Lograge event processing.
+    #
+    # The method handles several input formats and automatically extracts relevant
+    # fields:
+    # - Status messages ("Status 200") → extracts status code
+    # - Request lines ("GET http://example.com") → extracts method and path
+    # - User-Agent headers → extracts user_agent and accept fields
+    #
+    # @param severity [String, Integer] The log level as a string (DEBUG, INFO, WARN, ERROR, FATAL)
+    #   or Logger::Severity constant (0-4). If nil, level field is omitted.
+    # @param timestamp [Time] The time the log message was generated.
+    #   Will be formatted as ISO 8601 with milliseconds (YYYY-MM-DDTHH:MM:SS.sssZ).
+    # @param progname [String, nil] The program/gem name, typically auto-set by Rails.
+    #   Included in output if present.
+    # @param raw_msg [String, Hash, Object] The log message content. Can be:
+    #   - A plain string (processed for status, request type, user-agent patterns)
+    #   - A JSON string (parsed and merged into output)
+    #   - A Hash with structured data (split into required/optional fields)
+    #   - Any object (converted to string via to_s)
+    #
+    # @return [String] A JSON-formatted log line with trailing newline (\n).
+    #   Keys are ordered: ts, level first, then remaining fields alphabetically.
+    #
+    # @example String message (status extraction)
+    #   formatter.call('INFO', Time.now, 'MyApp', 'Status 200')
+    #   # => "{\"ts\":\"2026-02-24T10:30:45.123Z\",\"level\":\"INFO\",\"status\":200}\n"
+    #
+    # @example Hash message with request data
+    #   msg = {method: 'POST', path: '/api/users', status: 201, request_time: 45.3}
+    #   formatter.call('INFO', Time.now, 'Rails', msg)
+    #   # => "{\"ts\":\"2026-02-24T10:30:45.123Z\",\"level\":\"INFO\",\"method\":\"POST\",...}\n"
+    #
+    # @example With optional fields included
+    #   formatter = JsonFormatter.new(include_optional: true)
+    #   raw_msg = "User-Agent: \"Mozilla/5.0\"\nAccept: \"application/json\""
+    #   formatter.call('INFO', Time.now, 'Rails', raw_msg)
+    #   # => "{\"ts\":\"...\",\"level\":\"INFO\",\"user_agent\":\"Mozilla/5.0\",\"accept\":\"application/json\"}\n"
+    #
+    # @note The request_id from Thread.current[JsonRailsLogger::REQUEST_ID] is automatically
+    #   included if available. This is set by the RequestIdMiddleware.
+    #
+    # @raise [JSON::GeneratorError] If the final payload cannot be serialized to JSON
+    #   (rare; usually indicates circular references in custom log objects)
+    #
+    # @see Logger#initialize
+    # @see RequestIdMiddleware
+    # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html#method-i-call
     # rubocop:disable Metrics/MethodLength
     def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       sev = process_severity(severity)
@@ -227,7 +298,7 @@ module JsonRailsLogger
       tmp_msg if OPTIONAL_KEYS.any? { |key| msg[:optional].key?(key) }
     end
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/AbcSize
     def format_message(msg)
       new_msg = { optional: {} }
 
@@ -247,7 +318,7 @@ module JsonRailsLogger
 
       new_msg
     end
-    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
 
     # Check if the message is a hash with a single key :message with a string value
     # @param msg [Hash] the message to check
