@@ -10,12 +10,14 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Made ignored fields configurable via `include_ignored_keys` initialiser parameter
-  (defaults to `false` for backward compatibility).
+- Made ignored fields configurable via `include_ignored_keys` initialiser
+  parameter (defaults to `false` for backward compatibility).
 - Implemented test coverage for ignored field inclusion modes (enabled/disabled
   configurations).
 - Implemented automatic log level normalisation based on HTTP status codes.
 - Included test coverage reporting via SimpleCov.
+- Added YARD documentation workflow with versioned outputs for improved release
+  documentation.
 
 ### Changed
 
@@ -26,6 +28,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Included log level in required log fields for consistent output.
 - Updated request completion messages to include path, controller, and action.
 - Simplified payload assembly to build from timestamp before merging fields.
+- Updated framework and libraries via Railties update to 8.1.2 for
+  compatibility.
 
 ### Fixed
 
