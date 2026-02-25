@@ -19,10 +19,16 @@ describe 'JsonRailsLogger::RequestIdMiddleware' do
   # We set up a mock Rails constant with an env object that responds to development?
   # Returns false for production tests, true for development tests.
   def setup_rails_env(development:)
+    # Preserve any existing Rails constant so we can restore it later.
+    @original_rails = Object.const_get('Rails') if Object.const_defined?('Rails')
+    @rails_mocked = true
+
     mock_env = Object.new
     mock_env.define_singleton_method(:development?) { development }
     mock_rails = Class.new(Object)
     mock_rails.define_singleton_method(:env) { mock_env }
+
+    Object.send(:remove_const, 'Rails') if Object.const_defined?('Rails')
     Object.const_set('Rails', mock_rails)
   end
 
@@ -32,7 +38,16 @@ describe 'JsonRailsLogger::RequestIdMiddleware' do
   # but we clean up explicitly to be safe.
   after do
     Thread.current[JsonRailsLogger::REQUEST_ID] = nil
-    Object.send(:remove_const, 'Rails') if Object.const_defined?('Rails')
+
+    # Restore the original Rails constant if we replaced it.
+    if defined?(@rails_mocked) && @rails_mocked
+      if defined?(@original_rails) && @original_rails
+        Object.send(:remove_const, 'Rails') if Object.const_defined?('Rails')
+        Object.const_set('Rails', @original_rails)
+      elsif Object.const_defined?('Rails')
+        Object.send(:remove_const, 'Rails')
+      end
+    end
   end
 
   # Initialization and basic behavior tests
