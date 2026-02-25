@@ -40,3 +40,9 @@ jobs:
     - name: "Publish gem"
       run: |
         PAT=${{ secrets.GITHUB_TOKEN }} make publish
+
+    - name: "Publish docs"
+      uses: ./.github/workflows/docs.yml
+      with:
+        # Pass the version as an input to the docs workflow
+        version: ${{ steps.gitinfo.outputs.version }}
