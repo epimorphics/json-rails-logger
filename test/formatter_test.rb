@@ -180,7 +180,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['method']).must_equal('GET')
     _(json_output['path']).must_equal('/api/datasets/ukhpi/query')
     _(json_output['status']).must_equal(200)
-    _(json_output['duration']).must_equal(145.67)
+    _(json_output['request_time']).must_equal('0.146')
 
     # Verify ignored fields are excluded by default
     _(json_output['controller']).must_be_nil
@@ -273,6 +273,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
       _(json_output['method']).must_equal('POST')
       _(json_output['path']).must_equal('/api/exports/csv')
       _(json_output['status']).must_equal(202)
+      _(json_output['request_time']).must_equal('0.089')
     ensure
       Thread.current[JsonRailsLogger::REQUEST_ID] = nil
     end
@@ -331,7 +332,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     log_output = formatter.call('INFO', timestamp, progname, large_request_event)
     json_output = JSON.parse(log_output)
-    _(json_output['duration']).must_equal(3_600_000.0)
+    _(json_output['request_time']).must_equal(3_600_000)
 
     # Very small duration (1 microsecond)
     tiny_request_event = {
@@ -343,7 +344,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     log_output = formatter.call('INFO', timestamp, progname, tiny_request_event)
     json_output = JSON.parse(log_output)
-    _(json_output['duration']).must_equal(0.001)
+    _(json_output['request_time']).must_equal(0)
 
     # Zero duration
     zero_request_event = {
@@ -355,7 +356,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     log_output = formatter.call('INFO', timestamp, progname, zero_request_event)
     json_output = JSON.parse(log_output)
-    _(json_output['duration']).must_equal(0)
+    _(json_output['request_time']).must_be_nil
 
     # nil request_time (should not appear in output due to compact filter)
     nil_request_event = {

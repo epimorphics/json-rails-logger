@@ -156,7 +156,7 @@ module JsonRailsLogger
       end
 
       # * Add the request time to the message if it is present and does not already contain it
-      if new_msg[:request_time].present? && new_msg[:message].present? && new_msg[:message].exclude?(', time taken:') # rubocop:disable Layout/LineLength
+      if new_msg[:request_time].present? && new_msg[:message].present? && !new_msg[:message].include?(', time taken:') # rubocop:disable Layout/LineLength
         new_msg[:message] += format(', time taken: %.0f ms', new_msg[:request_time])
         seconds, milliseconds = new_msg[:request_time].to_i.divmod(1000)
         new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
@@ -309,8 +309,8 @@ module JsonRailsLogger
       split_msg =  partition_message_by_keys(msg)
       # ensure the log level is appropriately set based on the status code
       split_msg[0] = normalise_level(split_msg[0])
-      # Check if the message contains a duration key and normalise it
-      split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
+      # Check if the message contains a timing key and normalise it
+      split_msg[0] = normalise_timing(split_msg[0]) if includes_timing?(split_msg[0])
 
       new_msg.merge!(split_msg[0])
       new_msg[:ignored].merge!(split_msg[1])
@@ -382,7 +382,7 @@ module JsonRailsLogger
       { user_agent: user_agent, accept: accept }
     end
 
-    def includes_duration?(msg)
+    def includes_timing?(msg)
       msg.key?('duration') ||
         msg.key?(:duration) ||
         msg.key?('request_time') ||
@@ -391,9 +391,9 @@ module JsonRailsLogger
 
     # If request_time is a float, convert it to an integer as milliseconds µs -> ms
     # Duration is already in milliseconds from Lograge, so preserve it as-is
-    def normalise_duration(msg)
+    def normalise_timing(msg)
       msg.to_h do |k, v|
-        if k.to_s == 'request_time' && v.is_a?(Float)
+        if %w[duration request_time].include?(k.to_s) && v.is_a?(Float)
           [:request_time, v.round(0)]
         else
           [k, v]
