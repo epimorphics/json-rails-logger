@@ -10,12 +10,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Made optional fields configurable via `include_optional` initialiser parameter
+- Made ignored fields configurable via `include_ignored_keys` initialiser parameter
   (defaults to `false` for backward compatibility).
-- Added test coverage for optional field inclusion modes (enabled/disabled
+- Implemented test coverage for ignored field inclusion modes (enabled/disabled
   configurations).
-- Added automatic log level normalisation based on HTTP status codes.
-- Added test coverage reporting via SimpleCov.
+- Implemented automatic log level normalisation based on HTTP status codes.
+- Included test coverage reporting via SimpleCov.
 
 ### Changed
 

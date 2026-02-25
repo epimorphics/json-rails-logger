@@ -24,8 +24,8 @@ module JsonRailsLogger
       status
     ].freeze
 
-    ## Optional keys to be ignored from the output for the time being
-    OPTIONAL_KEYS = %w[
+    ## Ignored keys to be omitted from the output for the time being
+    IGNORED_KEYS = %w[
       accept
       action
       controller
@@ -66,21 +66,21 @@ module JsonRailsLogger
     # that includes extracted request metadata, status codes, user agent information,
     # and other relevant fields for operational monitoring.
     #
-    # @param include_optional [Boolean] Whether to include optional fields in formatted output.
+    # @param include_ignored_keys [Boolean] Whether to include ignored fields in formatted output.
     #   When true, fields like user_agent, accept, controller, and action are included.
     #   When false (default), only required fields are output. Set to true during
     #   development or debugging for detailed request information.
     #
     # @return [JsonRailsLogger::JsonFormatter] A configured formatter instance
     #
-    # @example Create formatter with optional fields
-    #   formatter = JsonRailsLogger::JsonFormatter.new(include_optional: true)
+    # @example Create formatter with ignored fields
+    #   formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
     #   formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize(include_optional: false)
+    def initialize(include_ignored_keys: false)
       super() # dont pass any arguments to the parent class as it does not expect any
-      @include_optional = include_optional
+      @include_ignored_keys = include_ignored_keys
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis
@@ -106,7 +106,7 @@ module JsonRailsLogger
     # @param raw_msg [String, Hash, Object] The log message content. Can be:
     #   - A plain string (processed for status, request type, user-agent patterns)
     #   - A JSON string (parsed and merged into output)
-    #   - A Hash with structured data (split into required/optional fields)
+    #   - A Hash with structured data (split into required/ignored fields)
     #   - Any object (converted to string via to_s)
     #
     # @return [String] A JSON-formatted log line with trailing newline (\n).
@@ -121,8 +121,8 @@ module JsonRailsLogger
     #   formatter.call('INFO', Time.now, 'Rails', msg)
     #   # => "{\"ts\":\"2026-02-24T10:30:45.123Z\",\"level\":\"INFO\",\"method\":\"POST\",...}\n"
     #
-    # @example With optional fields included
-    #   formatter = JsonFormatter.new(include_optional: true)
+    # @example With ignored fields included
+    #   formatter = JsonFormatter.new(include_ignored_keys: true)
     #   raw_msg = "User-Agent: \"Mozilla/5.0\"\nAccept: \"application/json\""
     #   formatter.call('INFO', Time.now, 'Rails', raw_msg)
     #   # => "{\"ts\":\"...\",\"level\":\"INFO\",\"user_agent\":\"Mozilla/5.0\",\"accept\":\"application/json\"}\n"
@@ -146,27 +146,12 @@ module JsonRailsLogger
       msg[:level] = sev.ljust(5).squish if sev
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
-      # * Uncomment to print out the raw, processed and formatted messages to the console
-      # if Rails.logger.debug?
-      #   puts "\n\e[41m> received #{severity} raw_msg at #{tmstmp}: #{raw_msg}\e[0m"
-      #   puts "\e[32m> processed #{severity} msg at #{tmstmp}: #{msg}\e[0m"
-      #   puts "\e[33m> formatted #{severity} new msg at #{tmstmp}: #{new_msg}\e[0m\n\n"
-      # end
-
       # * Start building the payload with the timestamp and then merge in the other fields as they are processed
       payload = { ts: tmstmp }
 
-      # ! SET THIS MESSAGE FROM WEBPACKER TO DEBUG LIKE THE DEVELOPERS SHOULD HAVE!
-      # ! NOTE: This message may still be present in production due to the logging
-      # ! level not actually being set to debug but can still be filtered out
-      # ! by the elastic search filters
-      if new_msg[:message] == "[Webpacker] Everything's up-to-date. Nothing to do"
-        payload[:level] = process_severity(Logger::DEBUG)
-      end
-
       # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
-      if new_msg[:optional].present? && new_msg[:optional].respond_to?(:[])
-        new_msg[:message] = process_optional_messages(new_msg)
+      if new_msg[:ignored].present? && new_msg[:ignored].respond_to?(:[])
+        new_msg[:message] = process_ignored_keys(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
       end
 
@@ -180,8 +165,8 @@ module JsonRailsLogger
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
-      payload.merge!(new_msg.sort.to_h.except!(:optional).compact)
-      payload.merge!(new_msg[:optional]) if @include_optional && new_msg[:optional].present?
+      payload.merge!(new_msg.sort.to_h.except!(:ignored).compact)
+      payload.merge!(new_msg[:ignored]) if @include_ignored_keys && new_msg[:ignored].present?
 
       # * Reorder so ts and level come first after all processing is done
       final_payload = {
@@ -215,10 +200,10 @@ module JsonRailsLogger
       # First try to partition by required keys
       split = msg.partition { |k, _v| REQUIRED_KEYS.include?(k.to_s) }.map(&:to_h)
 
-      # If no required keys found, try partitioning by optional keys instead
+      # If no required keys found, try partitioning by ignored keys instead
       return split unless split[0].empty?
 
-      msg.partition { |k, _v| OPTIONAL_KEYS.include?(k.to_s) }.map(&:to_h)
+      msg.partition { |k, _v| IGNORED_KEYS.include?(k.to_s) }.map(&:to_h)
     end
 
     # Process progname to remove the last space if it exists
@@ -237,22 +222,26 @@ module JsonRailsLogger
       progname
     end
 
+    # Extract the request ID from thread storage and include it in the log output if present
     def request_id
       request_id = Thread.current[JsonRailsLogger::REQUEST_ID]
       { request_id: request_id } if request_id
     end
 
+    # Extract the query string from thread storage and include it in the log output if present
     def query_string
       query_string ||= Thread.current[JsonRailsLogger::QUERY_STRING]
       { query_string: query_string } if query_string.present?
     end
 
+    # Extract the request parameters from thread storage and include them in the log output if present and query string is blank
     def request_params
       request_params = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
       request_params ||= Thread.current[JsonRailsLogger::PARAMS]
       { request_params: request_params } if request_params.present? && query_string.blank?
     end
 
+    # Process the raw message input and extract relevant fields based on its content and format
     def process_message(raw_msg)
       # If the message is nil, return an empty hash
       return {} if raw_msg.nil?
@@ -275,6 +264,7 @@ module JsonRailsLogger
       { message: msg.squish }
     end
 
+    # Remove unprintable characters from the message to prevent JSON serialization issues and ensure clean log output
     def remove_unprintable_characters(msg)
       # Remove ANSI escape codes
       msg = msg.gsub(/\e\[[0-9;]*m/, '') if msg.match?(/\e\[[0-9;]*m/)
@@ -286,14 +276,15 @@ module JsonRailsLogger
       msg
     end
 
-    def process_optional_messages(msg) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    # Process ignored keys to create a more user-friendly message for completed requests, including the controller, action, and request URI if available
+    def process_ignored_keys(msg) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       tmp_msg = msg[:message]
-      optional = msg[:optional]
+      ignored = msg[:ignored]
 
       # Check for both string and symbol keys to handle different input formats
-      action = optional['action'] || optional[:action]
-      controller = optional['controller'] || optional[:controller]
-      request_uri = optional['request_uri'] || optional[:request_uri]
+      action = ignored['action'] || ignored[:action]
+      controller = ignored['controller'] || ignored[:controller]
+      request_uri = ignored['request_uri'] || ignored[:request_uri]
 
       if action.present? && controller.present?
         # Extract controller name: Api::TransformationsController → Transformations
@@ -303,12 +294,12 @@ module JsonRailsLogger
 
       tmp_msg.insert(tmp_msg.index(','), format(' to %s', request_uri)) if request_uri.present?
 
-      tmp_msg if OPTIONAL_KEYS.any? { |key| optional.key?(key) || optional.key?(key.to_sym) }
+      tmp_msg if IGNORED_KEYS.any? { |key| ignored.key?(key) || ignored.key?(key.to_sym) }
     end
 
-    # rubocop:disable Metrics/AbcSize
-    def format_message(msg)
-      new_msg = { optional: {} }
+    # Format the message by separating required and ignored fields, normalizing status and duration, and preparing the final structure for JSON output
+    def format_message(msg) # rubocop:disable Metrics/AbcSize
+      new_msg = { ignored: {} }
 
       return msg.merge(new_msg) if string_message_field?(msg)
 
@@ -322,11 +313,10 @@ module JsonRailsLogger
       split_msg[0] = normalise_duration(split_msg[0]) if includes_duration?(split_msg[0])
 
       new_msg.merge!(split_msg[0])
-      new_msg[:optional].merge!(split_msg[1])
+      new_msg[:ignored].merge!(split_msg[1])
 
       new_msg
     end
-    # rubocop:enable Metrics/AbcSize
 
     # Check if the message is a hash with a single key :message with a string value
     # @param msg [Hash] the message to check
