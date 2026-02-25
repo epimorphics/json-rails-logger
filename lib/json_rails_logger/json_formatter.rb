@@ -298,7 +298,7 @@ module JsonRailsLogger
     end
 
     # Format the message by separating required and ignored fields, normalizing status and duration, and preparing the final structure for JSON output
-    def format_message(msg) # rubocop:disable Metrics/AbcSize
+    def format_message(msg)
       new_msg = { ignored: {} }
 
       return msg.merge(new_msg) if string_message_field?(msg)
@@ -307,8 +307,6 @@ module JsonRailsLogger
 
       # If the message is a hash, check if it contains the required keys
       split_msg =  partition_message_by_keys(msg)
-      # ensure the log level is appropriately set based on the status code
-      split_msg[0] = normalise_level(split_msg[0])
       # Check if the message contains a timing key and normalise it
       split_msg[0] = normalise_timing(split_msg[0]) if includes_timing?(split_msg[0])
 
@@ -395,25 +393,6 @@ module JsonRailsLogger
       msg.to_h do |k, v|
         if %w[duration request_time].include?(k.to_s) && v.is_a?(Float)
           [:request_time, v.round(0)]
-        else
-          [k, v]
-        end
-      end
-    end
-
-    # Verify the status of the request and refactor the log level
-    def normalise_level(msg) # rubocop:disable Metrics/MethodLength
-      status = msg[:status] || msg['status']
-      msg.to_h do |k, v|
-        if k.to_s == 'level'
-          level = case status.to_i
-                  when 500..599 then process_severity(Logger::ERROR)
-                  when 400..499 then process_severity(Logger::WARN)
-                  when 100..399 then process_severity(Logger::INFO)
-                  # If the status code is not present or does not match any of the above ranges, keep the original level
-                  else v
-                  end
-          [:level, level]
         else
           [k, v]
         end
