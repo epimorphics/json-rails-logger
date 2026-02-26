@@ -1,15 +1,35 @@
 # JSON log formatter for Rails
 
-A custom rails log formatter that outputs JSON instead of raw text. The goal of
-this gem is to output log messages from Rails applications in a JSON format that
-is consistent with the other applications that Epimorphics supports. Doing so
-makes the combined logs more useful for diagnosis and other system
-administration tasks.
+## Understanding json-rails-logger
 
-A particular feature of this logger is to output the `request_id` from the
-currently active HTTP request in every log.
+The json-rails-logger gem transforms Rails application logging from traditional
+plain-text format into structured JSON output. This standardisation is
+particularly valuable in environments where multiple applications need to
+produce logs in a consistent format, making it easier to aggregate, search, and
+analyse logs across different services.
 
-This gem can be used with any Rails app using the installation steps below.
+At its core, the gem replaces Rails' default logger formatter with one that
+serialises log entries as JSON objects. Each log message becomes a structured
+document with predictable fields like timestamp, severity level, HTTP method,
+request path, and response status. This structured approach eliminates the need
+for complex log parsing and makes the logs immediately queryable by log
+aggregation tools like Elasticsearch, Splunk, or CloudWatch Logs Insights.
+
+A key feature of this logger is its handling of request context. It
+automatically captures and includes the request_id in every log entry during an
+HTTP request's lifecycle. This correlation identifier becomes invaluable when
+tracing a single user request through multiple log entries, background jobs, or
+even across microservices. The gem achieves this through middleware that stores
+the request ID in thread-local storage, making it available to the formatter
+without requiring explicit parameter passing throughout the application code.
+
+The design philosophy prioritises consistency across Epimorphics' application
+portfolio. By ensuring all Rails applications output logs in the same JSON
+structure, the organisation gains a unified logging interface that simplifies
+operations, monitoring, and debugging across its entire infrastructure. This
+consistency is particularly beneficial when correlating events across multiple
+applications or when building dashboards that aggregate metrics from various
+sources.
 
 ## Internal structure
 
@@ -17,6 +37,30 @@ This logger makes use of [lograge](https://github.com/roidrage/lograge) to
 "attempt to tame Rails' default policy". However, we augment the JSON format
 used by lograge to fit our local requirements, and ensure the HTTP request ID
 is logged where available.
+
+### Gem API Documentation
+
+The gem includes comprehensive YARD documentation covering all public classes,
+methods, and configuration options. Running `make doc` generates a complete HTML
+reference that provides detailed insights into the gem's internal architecture
+and public API surface. This documentation is particularly valuable when
+customising the logger's behaviour, understanding its integration points with
+Rails, or extending its functionality for specialised use cases.
+
+The generated documentation includes method signatures with parameter types,
+return value specifications, usage examples, and cross-references to related
+Rails and Ruby standard library components. Each public method is annotated with
+practical examples showing common configuration patterns and integration
+scenarios. The documentation also covers thread-safety considerations,
+middleware behaviour, and the gem's interaction with Lograge's internal
+mechanisms.
+
+To explore the full API reference, class hierarchies, and method documentation,
+run `make doc` from the project root. This executes YARD to parse the source
+code annotations and produce browsable HTML output in the `doc/` directory and
+then opens `doc/index.html` in your browser. The generated docs are particularly
+useful when integrating the gem into complex Rails applications or when
+troubleshooting unexpected logging behaviour.
 
 ## Using with a Rails application
 
@@ -32,6 +76,14 @@ And this to your environment config (e.g. `config/environments/production.rb`):
 
 ```ruby
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
+```
+
+To include fields that are ignored by default (such as `action`, `controller`,
+or `user_agent`), set `include_ignored_keys: true` when configuring the logger
+(e.g. in `config/environments/development.rb`):
+
+```ruby
+config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
 ```
 
 ## How It Works
