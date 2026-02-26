@@ -131,19 +131,6 @@ several reasons:
 - **No context passing**: The formatter and other components can read the
   request ID without it being passed as a parameter
 
-### Configuring Ignored Fields
-
-By default, ignored fields (e.g. `user_agent`, `accept`, `controller`,
-`action`) are excluded from JSON output. To include them, configure the
-logger with the `include_ignored_keys` parameter:
-
-```ruby
-config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
-```
-
-This is useful during development or debugging when you want more detailed
-request information.
-
 ## GitHub package registry
 
 This gem is published via the Epimorphics instance of the
