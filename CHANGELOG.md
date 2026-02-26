@@ -14,7 +14,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   parameter (defaults to `false` for backward compatibility).
 - Implemented test coverage for ignored field inclusion modes (enabled/disabled
   configurations).
-- Implemented automatic log level normalisation based on HTTP status codes.
 - Included test coverage reporting via SimpleCov.
 - Added YARD documentation workflow with versioned outputs for improved release
   documentation.
