@@ -36,13 +36,27 @@ jobs:
         prerelease: false
         files: |
           json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
+    outputs:
+      version: ${{ steps.gitinfo.outputs.version }}
 
+  release:
+    name: "Publish gem and docs"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: "Publish gem"
       run: |
         PAT=${{ secrets.GITHUB_TOKEN }} make publish
 
+  publish-docs:
+    # The docs workflow is currently disabled because it requires additional discussion and setup.
+    if: false
+    name: "Publish documentation"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: "Publish docs"
       uses: ./.github/workflows/docs.yml
       with:
         # Pass the version as an input to the docs workflow
-        version: ${{ steps.gitinfo.outputs.version }}
+        version: ${{ needs.build.outputs.version }}

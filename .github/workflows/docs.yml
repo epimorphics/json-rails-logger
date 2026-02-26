@@ -9,12 +9,14 @@ on:
         description: 'Version string for documentation path (e.g., 2.3.0)'
         required: false
         type: string
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version string for documentation path (e.g., 2.3.0)'
-        required: true
-        type: string
+
+  # Uncomment the following lines to enable manual triggering of the docs workflow
+  # workflow_dispatch:
+  #   inputs:
+  #     version:
+  #       description: 'Version string for documentation path (e.g., 2.3.0)'
+  #       required: true
+  #       type: string
 
 permissions:
   id-token: write
