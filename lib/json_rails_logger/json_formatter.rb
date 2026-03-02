@@ -24,39 +24,6 @@ module JsonRailsLogger
       status
     ].freeze
 
-    ## Ignored keys to be omitted from the output for the time being
-    IGNORED_KEYS = %w[
-      accept
-      action
-      controller
-      db
-      encoding
-      format
-      forwarded_for
-      gateway
-      http_accept_charset
-      http_accept_encoding
-      http_accept_language
-      http_cache_control
-      http_charset
-      http_cookie
-      http_connection
-      http_host
-      http_origin
-      http_referer
-      keep_alive
-      params
-      remote_addr
-      request_uri
-      request_url
-      server_name
-      server_port
-      server_protocol
-      server_software
-      user_agent
-      view
-    ].freeze
-
     ## Request methods to check for in the message
     REQUEST_METHODS = %w[GET POST PUT DELETE PATCH].freeze
 
@@ -66,21 +33,15 @@ module JsonRailsLogger
     # that includes extracted request metadata, status codes, user agent information,
     # and other relevant fields for operational monitoring.
     #
-    # @param include_ignored_keys [Boolean] Whether to include ignored fields in formatted output.
-    #   When true, fields like user_agent, accept, controller, and action are included.
-    #   When false (default), only required fields are output. Set to true during
-    #   development or debugging for detailed request information.
-    #
     # @return [JsonRailsLogger::JsonFormatter] A configured formatter instance
     #
-    # @example Create formatter with ignored fields
-    #   formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+    # @example Create formatter
+    #   formatter = JsonRailsLogger::JsonFormatter.new
     #   formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize(include_ignored_keys: false)
-      super() # dont pass any arguments to the parent class as it does not expect any
-      @include_ignored_keys = include_ignored_keys
+    def initialize # rubocop:disable Lint/UselessMethodDefinition
+      super # dont pass any arguments to the parent class as it does not expect any
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis

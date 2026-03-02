@@ -4,8 +4,7 @@ require './test/test_helper'
 
 describe 'JsonRailsLogger::JsonFormatter' do
   let(:fixture) do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+  formatter = JsonRailsLogger::JsonFormatter.new
     formatter
   end
 
@@ -89,7 +88,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['request_time']).must_equal(1_234_568)
   end
 
-  it 'should exclude ignored fields by default' do
+  it 'should include user_agent and accept from user-agent headers' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
@@ -97,24 +96,12 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('INFO', timestamp, progname, message)
     json_output = JSON.parse(log_output)
 
-    _(json_output['user_agent']).must_be_nil
-    _(json_output['accept']).must_be_nil
-  end
-
-  it 'should include ignored message fields when configured' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-
-    message = "User-Agent: \"Test-Client\"\nAccept: \"application/json\""
-    log_output = formatter.call('INFO', timestamp, progname, message)
-    json_output = JSON.parse(log_output)
-
-    _(json_output['user_agent']).wont_be_nil
-    _(json_output['accept']).wont_be_nil
+    _(json_output['user_agent']).must_equal('Test-Agent')
+    _(json_output['accept']).must_equal('application/json')
   end
 
   it 'should handle nil severity without truncation errors' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     log_output = formatter.call(nil, timestamp, progname, 'Status 200')
@@ -136,24 +123,20 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(keys[1]).must_equal('level')
   end
 
-  it 'should maintain consistent required fields regardless of ignored inclusion' do
-    formatter_with_ignored = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter_without_ignored = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+  it 'should always include required fields in output' do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    [formatter_with_ignored, formatter_without_ignored].each do |formatter|
-      formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-      log_output = formatter.call('INFO', timestamp, progname, 'Status 200')
-      json_output = JSON.parse(log_output)
+    log_output = formatter.call('INFO', timestamp, progname, 'Status 200')
+    json_output = JSON.parse(log_output)
 
-      _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
-      _(json_output['level']).must_equal('INFO')
-      _(json_output['status']).must_equal(200)
-    end
+    _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
+    _(json_output['level']).must_equal('INFO')
+    _(json_output['status']).must_equal(200)
   end
 
-  # Integration tests with real request/response scenarios
   it 'should format a complete request event' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Simulate a typical data query request
@@ -192,7 +175,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should handle request events with exceptions' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Simulate a data import validation failure
@@ -220,8 +203,8 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['status']).must_equal(422)
   end
 
-  it 'should include controller and action in request output when include_ignored_keys is true' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+  it 'should compose message with controller and action details' do
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Simulate a dataset transformation request
@@ -237,16 +220,14 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('INFO', timestamp, progname, request_event)
     json_output = JSON.parse(log_output)
 
-    # Verify ignored fields ARE included
+    # Verify controller/action composition in message
+    _(json_output['message']).must_match(/Transformations.*apply.*request complete/)
     _(json_output['controller']).must_equal('Api::TransformationsController')
     _(json_output['action']).must_equal('apply')
-
-    # Verify the completion message formatting
-    _(json_output['message']).must_match(/Transformations.*apply.*request complete/)
   end
 
   it 'should include request_id from thread storage with request event' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     request_id = 'data-export-abc123-def456'
@@ -281,7 +262,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
   # Error handling tests
   it 'should handle malformed JSON gracefully' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Invalid JSON (missing closing brace)
@@ -299,7 +280,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should handle invalid severity values gracefully' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Invalid severity: empty string
@@ -319,7 +300,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should handle edge-case request_time values' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Extremely large duration (1 hour in milliseconds)
@@ -385,7 +366,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
   end
 
   it 'should handle circular references without crashing' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     # Create an object with circular reference
