@@ -157,14 +157,13 @@ module JsonRailsLogger
       format_datetime(timestamp.utc)
     end
 
-    def partition_message_by_keys(msg)
-      # First try to partition by required keys
-      split = msg.partition { |k, _v| REQUIRED_KEYS.include?(k.to_s) }.map(&:to_h)
-
-      # If no required keys found, try partitioning by ignored keys instead
-      return split unless split[0].empty?
-
-      msg.partition { |k, _v| IGNORED_KEYS.include?(k.to_s) }.map(&:to_h)
+    def ensure_required_keys(msg)
+      msg = msg.to_h if msg.respond_to?(:to_h)
+      REQUIRED_KEYS.each do |key|
+        key_sym = key.to_sym
+        msg[key_sym] = msg[key_sym] || msg[key.to_s] || nil unless msg.key?(key_sym)
+      end
+      msg
     end
 
     # Process progname to remove the last space if it exists
@@ -260,21 +259,13 @@ module JsonRailsLogger
 
     # Format the message by separating required and ignored fields, normalizing status and duration, and preparing the final structure for JSON output
     def format_message(msg)
-      new_msg = { ignored: {} }
+      return msg if string_message_field?(msg)
+      return {} unless msg.is_a?(Enumerable)
 
-      return msg.merge(new_msg) if string_message_field?(msg)
+      msg = ensure_required_keys(msg)
+      msg = normalise_timing(msg) if includes_timing?(msg)
 
-      return new_msg.merge(msg) unless msg.is_a?(Enumerable)
-
-      # If the message is a hash, check if it contains the required keys
-      split_msg =  partition_message_by_keys(msg)
-      # Check if the message contains a timing key and normalise it
-      split_msg[0] = normalise_timing(split_msg[0]) if includes_timing?(split_msg[0])
-
-      new_msg.merge!(split_msg[0])
-      new_msg[:ignored].merge!(split_msg[1])
-
-      new_msg
+      msg
     end
 
     # Check if the message is a hash with a single key :message with a string value
