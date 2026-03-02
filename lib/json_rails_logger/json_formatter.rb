@@ -67,7 +67,7 @@ module JsonRailsLogger
     # @param raw_msg [String, Hash, Object] The log message content. Can be:
     #   - A plain string (processed for status, request type, user-agent patterns)
     #   - A JSON string (parsed and merged into output)
-    #   - A Hash with structured data (split into required/ignored fields)
+    #   - A Hash with structured data (validated against required schema, all keys included in output)
     #   - Any object (converted to string via to_s)
     #
     # @return [String] A JSON-formatted log line with trailing newline (\n).
@@ -82,8 +82,8 @@ module JsonRailsLogger
     #   formatter.call('INFO', Time.now, 'Rails', msg)
     #   # => "{\"ts\":\"2026-02-24T10:30:45.123Z\",\"level\":\"INFO\",\"method\":\"POST\",...}\n"
     #
-    # @example With ignored fields included
-    #   formatter = JsonFormatter.new(include_ignored_keys: true)
+    # @example With user-agent and accept extraction
+    #   formatter = JsonFormatter.new
     #   raw_msg = "User-Agent: \"Mozilla/5.0\"\nAccept: \"application/json\""
     #   formatter.call('INFO', Time.now, 'Rails', raw_msg)
     #   # => "{\"ts\":\"...\",\"level\":\"INFO\",\"user_agent\":\"Mozilla/5.0\",\"accept\":\"application/json\"}\n"
@@ -116,13 +116,18 @@ module JsonRailsLogger
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
       end
 
-      # * Add the request time to the message if it is present and does not already contain it
+      # * Add the request time to the message if it is present and does not
+      #   already contain it
       if new_msg[:request_time].present? && new_msg[:message].present? && !new_msg[:message].include?(', time taken:') # rubocop:disable Layout/LineLength
         new_msg[:message] += format(', time taken: %.0f ms', new_msg[:request_time])
         seconds, milliseconds = new_msg[:request_time].to_i.divmod(1000)
         new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
       end
 
+      # * Merge in the query string and request params if they are present in
+      #   thread storage, giving precedence to request params if both are
+      #   present. This ensures that we capture the most relevant request
+      #   metadata for log analysis.
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
@@ -134,7 +139,8 @@ module JsonRailsLogger
         level: payload[:level]
       }.merge(payload.except(:ts, :level))
 
-      # * Convert the final payload to JSON and add a newline character at the end for better readability in the logs
+      # * Convert the final payload to JSON and add a newline character at the
+      #   end for better readability in the logs
       "#{final_payload.to_json}\n"
     end
     # rubocop:enable Metrics/MethodLength
@@ -260,7 +266,7 @@ module JsonRailsLogger
       append_request_uri(tmp_msg, request_uri)
     end
 
-    # Format the message by separating required and ignored fields, normalizing status and duration, and preparing the final structure for JSON output
+    # Format the message by ensuring required fields are present and normalizing timing values
     def format_message(msg)
       return msg if string_message_field?(msg)
       return {} unless msg.is_a?(Enumerable)
