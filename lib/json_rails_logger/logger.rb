@@ -12,23 +12,22 @@ module JsonRailsLogger
     #
     # @param logdev [IO, String, File] The output device to write log messages to.
     #   Typically STDOUT for production, or a file path for file-based logging.
-    # @param include_ignored_keys [Boolean] Whether to include ignored fields in JSON output.
-    #   ignored fields include user_agent, accept, controller, action, and other HTTP
-    #   header information. Defaults to false for backward compatibility.
+    # @param include_ignored_keys [Boolean] Deprecated compatibility parameter.
+    #   This option is accepted for backward compatibility but has no effect.
     #
     # @return [JsonRailsLogger::Logger] A configured logger instance
     #
     # @example Basic usage in Rails environment config
     #   config.logger = JsonRailsLogger::Logger.new(STDOUT)
     #
-    # @example With ignored fields enabled for development
+    # @example With deprecated compatibility parameter
     #   config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
     #
     # @see https://guides.rubyonrails.org/debugging_rails_applications.html#the-logger
     # @see JsonFormatter#initialize
-    def initialize(logdev, include_ignored_keys: false)
+    def initialize(logdev)
       # Set up the formatter to use our custom JSON formatter
-      formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: include_ignored_keys)
+      formatter = JsonRailsLogger::JsonFormatter.new
       # and set the datetime format to ISO 8601 with milliseconds and UTC timezone
       formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
       # Call the parent constructor with the logdev and formatter
