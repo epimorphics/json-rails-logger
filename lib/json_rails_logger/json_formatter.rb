@@ -110,9 +110,9 @@ module JsonRailsLogger
       # * Start building the payload with the timestamp and then merge in the other fields as they are processed
       payload = { ts: tmstmp }
 
-      # ! SET THIS MESSAGE FROM RAILS TO DEBUG AS IT CONTAINS ONLY BASE INFORMATION!
-      if new_msg[:ignored].present? && new_msg[:ignored].respond_to?(:[])
-        new_msg[:message] = process_ignored_keys(new_msg)
+      # Append request context details to the message when present
+      if new_msg[:action].present? || new_msg[:controller].present?
+        new_msg[:message] = append_request_details(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
       end
 
@@ -126,8 +126,7 @@ module JsonRailsLogger
       payload.merge!(query_string.to_h) unless query_string.nil?
       payload.merge!(request_params.to_h) unless request_params.nil?
       payload.merge!(request_id.to_h)
-      payload.merge!(new_msg.sort.to_h.except!(:ignored).compact)
-      payload.merge!(new_msg[:ignored]) if @include_ignored_keys && new_msg[:ignored].present?
+      payload.merge!(new_msg.sort.to_h.compact)
 
       # * Reorder so ts and level come first after all processing is done
       final_payload = {
@@ -236,25 +235,29 @@ module JsonRailsLogger
       msg
     end
 
-    # Process ignored keys to create a more user-friendly message for completed requests, including the controller, action, and request URI if available
-    def process_ignored_keys(msg) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      tmp_msg = msg[:message]
-      ignored = msg[:ignored]
+    # Builds a message from controller and action names
+    def build_controller_action_message(action, controller, original_message)
+      return original_message if action.blank? || controller.blank?
 
-      # Check for both string and symbol keys to handle different input formats
-      action = ignored['action'] || ignored[:action]
-      controller = ignored['controller'] || ignored[:controller]
-      request_uri = ignored['request_uri'] || ignored[:request_uri]
+      controller_name = controller.to_s.gsub('Controller', '').split('::').last
+      "#{controller_name} #{action} request complete"
+    end
 
-      if action.present? && controller.present?
-        # Extract controller name: Api::TransformationsController → Transformations
-        controller_name = controller.to_s.gsub('Controller', '').split('::').last
-        tmp_msg = "#{controller_name} #{action} request complete"
-      end
+    # Appends request URI to the message at the first comma
+    def append_request_uri(message, request_uri)
+      return message if request_uri.blank? || !message.include?(',')
 
-      tmp_msg.insert(tmp_msg.index(','), format(' to %s', request_uri)) if request_uri.present?
+      message.insert(message.index(','), format(' to %s', request_uri))
+    end
 
-      tmp_msg if IGNORED_KEYS.any? { |key| ignored.key?(key) || ignored.key?(key.to_sym) }
+    # Appends request context information to the log message
+    def append_request_details(msg)
+      action = msg['action'] || msg[:action]
+      controller = msg['controller'] || msg[:controller]
+      request_uri = msg['request_uri'] || msg[:request_uri]
+
+      tmp_msg = build_controller_action_message(action, controller, msg[:message]) || ''
+      append_request_uri(tmp_msg, request_uri)
     end
 
     # Format the message by separating required and ignored fields, normalizing status and duration, and preparing the final structure for JSON output
