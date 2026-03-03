@@ -292,8 +292,8 @@ module JsonRailsLogger
         tmp_msg = "#{controller_name} #{action} request complete"
       end
 
-      # If request_uri is present, add it to the message for better context
-      tmp_msg.insert(tmp_msg.index(','), format(' to %s', request_uri)) if request_uri.present?
+      # If request_uri is present, append it to the message for better context
+      tmp_msg += format(' to %s', request_uri) if request_uri.present?
 
       # return the formatted message if any ignored keys are present, otherwise return the original message
       if IGNORED_KEYS.any? { |key| ignored.key?(key) || ignored.key?(key.to_sym) }

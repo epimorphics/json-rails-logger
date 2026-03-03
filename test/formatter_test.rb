@@ -409,4 +409,114 @@ describe 'JsonRailsLogger::JsonFormatter' do
       _(e.message).must_include('circular')
     end
   end
+
+  # Unit tests for private method: process_ignored_keys
+  describe 'JsonFormatter#process_ignored_keys (unit)' do
+    let(:formatter) do
+      f = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+      f.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+      f
+    end
+
+    it 'should format message and insert request_uri before comma when all three keys present' do
+      msg = {
+        message: 'Initial request, additional info',
+        ignored: {
+          'controller' => 'Api::TransformationsController',
+          'action' => 'apply',
+          'request_uri' => '/api/datasets/transform',
+          'user_agent' => 'TestClient'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      _(result).must_match(/Transformations apply request complete/)
+      _(result).must_include('to /api/datasets/transform')
+      # Verify URI was appended to the message
+      _(result).must_match(%r{Transformations apply request complete to /api/datasets/transform})
+    end
+
+    it 'should extract controller name from namespaced controller' do
+      msg = {
+        message: 'Request event, context info',
+        ignored: {
+          'controller' => 'Admin::Dashboard::AnalyticsController',
+          'action' => 'show',
+          'user_agent' => 'Chrome'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      # Should extract last segment after Controller suffix
+      _(result).must_match(/Analytics show request complete/)
+    end
+
+    it 'should not format message if controller is missing' do
+      msg = {
+        message: 'Original message text',
+        ignored: {
+          'action' => 'index',
+          'user_agent' => 'Firefox'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      # Without controller, action alone does not trigger formatting
+      _(result).must_equal('Original message text')
+    end
+
+    it 'should return original message when ignored hash has no IGNORED_KEYS members' do
+      msg = {
+        message: 'Base message content',
+        ignored: {
+          'custom_field' => 'value1',
+          'another_field' => 'value2',
+          'service_name' => 'my_service'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      # No IGNORED_KEYS present, so IGNORED_KEYS.any? check fails
+      _(result).must_equal('Base message content')
+    end
+
+    it 'should handle symbol keys as alternative to string keys in ignored hash' do
+      msg = {
+        message: 'Request context',
+        ignored: {
+          controller: 'Api::UsersController',
+          action: 'update',
+          request_uri: '/api/users/42'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      # Symbol keys should work via the || fallback
+      _(result).must_match(/Users update request complete/)
+      _(result).must_include('to /api/users/42')
+    end
+
+    it 'should append request_uri to formatted message when present' do
+      msg = {
+        message: 'Simple message',
+        ignored: {
+          'controller' => 'Api::TestController',
+          'action' => 'test',
+          'request_uri' => '/api/test'
+        }
+      }
+
+      result = formatter.send(:process_ignored_keys, msg)
+
+      # Should format the message with controller and action
+      _(result).must_match(/Test test request complete/)
+      # Should append the request_uri to the message
+      _(result).must_include(' to /api/test')
+    end
+  end
 end
