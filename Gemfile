@@ -7,9 +7,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 group :maintenance do
-  gem 'json', '~> 2.3'
-  gem 'lograge', '~> 0.14'
-  gem 'railties', '~> 8.0'
+  gem 'json', '>= 1.8'      # works back to Ruby 2.x era
+  gem 'lograge', '>= 0.10'  # older but stable
+  gem 'railties', '>= 6.0'  # broadest Rails compatibility
 end
 
 group :development, :test do

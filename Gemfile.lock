@@ -2,9 +2,9 @@ PATH
   remote: .
   specs:
     json_rails_logger (2.3.0)
-      json (~> 2.3)
-      lograge (~> 0.14)
-      railties (~> 8.0)
+      json (>= 1.8)
+      lograge (>= 0.10)
+      railties (>= 6.0)
 
 GEM
   remote: https://rubygems.org/
