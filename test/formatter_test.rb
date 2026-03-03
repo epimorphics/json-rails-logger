@@ -4,7 +4,7 @@ require './test/test_helper'
 
 describe 'JsonRailsLogger::JsonFormatter' do
   let(:fixture) do
-  formatter = JsonRailsLogger::JsonFormatter.new
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter
   end
 
@@ -165,13 +165,13 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['status']).must_equal(200)
     _(json_output['request_time']).must_equal('0.146')
 
-    # Verify ignored fields are excluded by default
-    _(json_output['controller']).must_be_nil
-    _(json_output['action']).must_be_nil
-    _(json_output['user_agent']).must_be_nil
+    # Verify request context fields are retained
+    _(json_output['controller']).must_equal('Api::DatasetsController')
+    _(json_output['action']).must_equal('query')
+    _(json_output['user_agent']).must_equal('Mozilla/5.0')
 
-    # Verify params are excluded (not in REQUIRED_KEYS)
-    _(json_output['params']).must_be_nil
+    # Verify params are retained under all-keys processing
+    _(json_output['params']).must_equal({ 'dataset' => 'ukhpi', 'limit' => '100' })
   end
 
   it 'should handle request events with exceptions' do

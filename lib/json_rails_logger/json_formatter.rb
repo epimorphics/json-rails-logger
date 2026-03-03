@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Namespace for JSON logger components used by Rails integrations.
 module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter # rubocop:disable Metrics/ClassLength
@@ -40,8 +41,9 @@ module JsonRailsLogger
     #   formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize # rubocop:disable Lint/UselessMethodDefinition
+    def initialize(**_opts)
       super # dont pass any arguments to the parent class as it does not expect any
+      self.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis
@@ -142,6 +144,8 @@ module JsonRailsLogger
       # * Convert the final payload to JSON and add a newline character at the
       #   end for better readability in the logs
       "#{final_payload.to_json}\n"
+    rescue JSON::NestingError
+      raise JSON::GeneratorError, 'circular reference detected'
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -249,11 +253,12 @@ module JsonRailsLogger
       "#{controller_name} #{action} request complete"
     end
 
-    # Appends request URI to the message at the first comma
+    # Appends request URI to the message when available.
     def append_request_uri(message, request_uri)
-      return message if request_uri.blank? || !message.include?(',')
+      return message if request_uri.blank?
 
-      message.insert(message.index(','), format(' to %s', request_uri))
+      # If request_uri is present, append it to the message for better context
+      message + format(' to %s', request_uri)
     end
 
     # Appends request context information to the log message
@@ -266,7 +271,7 @@ module JsonRailsLogger
       append_request_uri(tmp_msg, request_uri)
     end
 
-    # Format the message by ensuring required fields are present and normalizing timing values
+    # Format the message by ensuring required fields are present and normalising timing values
     def format_message(msg)
       return msg if string_message_field?(msg)
       return {} unless msg.is_a?(Enumerable)
