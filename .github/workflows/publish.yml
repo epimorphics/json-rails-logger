@@ -40,7 +40,7 @@ jobs:
       version: ${{ steps.gitinfo.outputs.version }}
 
   release:
-    name: "Publish gem to EpiMorphics RubyGems repository"
+    name: "Publish gem to Epimorphics RubyGems repository"
     needs: build
     runs-on: ubuntu-latest
     steps:
