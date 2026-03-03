@@ -356,13 +356,15 @@ module JsonRailsLogger
     # If request_time is a float, convert it to an integer as milliseconds µs -> ms
     # Duration is already in milliseconds from Lograge, so preserve it as-is
     def normalise_timing(msg)
-      msg.to_h do |k, v|
-        if %w[duration request_time].include?(k.to_s) && v.is_a?(Float)
-          [:request_time, v.round(0)]
-        else
-          [k, v]
-        end
+      result = msg.to_h { |k, v| [k, v] }
+
+      if result[:request_time].nil? && result[:duration].is_a?(Float)
+        result[:request_time] = result[:duration].round(0)
+      elsif result[:request_time].is_a?(Float)
+        result[:request_time] = result[:request_time].round(0)
       end
+
+      result
     end
   end
 end
