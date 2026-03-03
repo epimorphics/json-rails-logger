@@ -48,15 +48,3 @@ jobs:
       run: |
         PAT=${{ secrets.GITHUB_TOKEN }} make publish
 
-  publish-docs:
-    # The docs workflow is currently disabled because it requires additional discussion and setup.
-    if: false
-    name: "Publish documentation"
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Publish docs"
-      uses: ./.github/workflows/docs.yml
-      with:
-        # Pass the version as an input to the docs workflow
-        version: ${{ needs.build.outputs.version }}
