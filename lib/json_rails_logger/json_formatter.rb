@@ -126,13 +126,10 @@ module JsonRailsLogger
         new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
       end
 
-      # * Merge in the query string and request params if they are present in
-      #   thread storage, giving precedence to request params if both are
-      #   present. This ensures that we capture the most relevant request
+      # * Merge in request context from thread storage (request_id, query_string,
+      #   request_params). This ensures that we capture the most relevant request
       #   metadata for log analysis.
-      payload.merge!(query_string.to_h) unless query_string.nil?
-      payload.merge!(request_params.to_h) unless request_params.nil?
-      payload.merge!(request_id.to_h)
+      payload.merge!(FormattingComponents::RequestContext.collect)
       payload.merge!(new_msg.sort.to_h.compact)
 
       # * Reorder so ts and level come first after all processing is done
@@ -189,25 +186,6 @@ module JsonRailsLogger
       progname = progname[0..-2] if progname[-1] == ' '
       # Return the progname
       progname
-    end
-
-    # Extract the request ID from thread storage and include it in the log output if present
-    def request_id
-      request_id = Thread.current[JsonRailsLogger::REQUEST_ID]
-      { request_id: request_id } if request_id
-    end
-
-    # Extract the query string from thread storage and include it in the log output if present
-    def query_string
-      query_string ||= Thread.current[JsonRailsLogger::QUERY_STRING]
-      { query_string: query_string } if query_string.present?
-    end
-
-    # Extract the request parameters from thread storage and include them in the log output if present
-    def request_params
-      request_params = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
-      request_params ||= Thread.current[JsonRailsLogger::PARAMS]
-      { request_params: request_params } if request_params.present?
     end
 
     # Process the raw message input by delegating to MessageParser
