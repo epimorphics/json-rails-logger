@@ -203,11 +203,11 @@ module JsonRailsLogger
       { query_string: query_string } if query_string.present?
     end
 
-    # Extract the request parameters from thread storage and include them in the log output if present and query string is blank
+    # Extract the request parameters from thread storage and include them in the log output if present
     def request_params
       request_params = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
       request_params ||= Thread.current[JsonRailsLogger::PARAMS]
-      { request_params: request_params } if request_params.present? && query_string.blank?
+      { request_params: request_params } if request_params.present?
     end
 
     # Process the raw message input and extract relevant fields based on its content and format
@@ -215,8 +215,8 @@ module JsonRailsLogger
       # If the message is nil, return an empty hash
       return {} if raw_msg.nil?
 
-      # Otherwise, normalize the message
-      msg = normalize_message(raw_msg)
+      # Otherwise, normalise the message
+      msg = normalise_message(raw_msg)
 
       return msg unless msg.is_a?(String)
       return status_message(msg) if status_message?(msg)
@@ -291,7 +291,7 @@ module JsonRailsLogger
         msg.fetch(:message, nil).is_a?(String)
     end
 
-    def normalize_message(raw_msg)
+    def normalise_message(raw_msg)
       return raw_msg unless raw_msg.is_a?(String)
 
       JSON.parse(raw_msg)
