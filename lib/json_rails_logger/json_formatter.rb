@@ -93,7 +93,7 @@ module JsonRailsLogger
     # @note The request_id from Thread.current[JsonRailsLogger::REQUEST_ID] is automatically
     #   included if available. This is set by the RequestIdMiddleware.
     #
-    # @raise [JSON::GeneratorError] If the final payload cannot be serialized to JSON
+    # @raise [JSON::GeneratorError] If the final payload cannot be serialised to JSON
     #   (rare; usually indicates circular references in custom log objects)
     #
     # @see Logger#initialize

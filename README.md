@@ -78,14 +78,6 @@ And this to your environment config (e.g. `config/environments/production.rb`):
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
 
-To include fields that are ignored by default (such as `action`, `controller`,
-or `user_agent`), set `include_ignored_keys: true` when configuring the logger
-(e.g. in `config/environments/development.rb`):
-
-```ruby
-config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
-```
-
 ## How It Works
 
 ### Automatic Railtie Setup

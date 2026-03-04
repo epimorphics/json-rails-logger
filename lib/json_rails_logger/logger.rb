@@ -12,16 +12,11 @@ module JsonRailsLogger
     #
     # @param logdev [IO, String, File] The output device to write log messages to.
     #   Typically STDOUT for production, or a file path for file-based logging.
-    # @param include_ignored_keys [Boolean] Deprecated compatibility parameter.
-    #   This option is accepted for backward compatibility but has no effect.
     #
     # @return [JsonRailsLogger::Logger] A configured logger instance
     #
     # @example Basic usage in Rails environment config
     #   config.logger = JsonRailsLogger::Logger.new(STDOUT)
-    #
-    # @example With deprecated compatibility parameter
-    #   config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
     #
     # @see https://guides.rubyonrails.org/debugging_rails_applications.html#the-logger
     # @see JsonFormatter#initialize

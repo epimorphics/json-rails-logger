@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JsonRailsLogger
-  # Namespace for formatting components used to decompose JSON formatter logic
+  # Namespace for formatting components used to deconstruct JSON formatter logic
   module FormattingComponents
     # Centralises retrieval of request-scoped metadata from thread-local storage for log enrichment.
     #

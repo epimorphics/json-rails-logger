@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JsonRailsLogger
-  # Namespace for formatting components used to decompose JSON formatter logic
+  # Namespace for formatting components used to deconstruct JSON formatter logic
   module FormattingComponents
     # Validates and normalises message data structures for structured logging.
     #
@@ -15,7 +15,7 @@ module JsonRailsLogger
     #   validator = FormattingComponents::MessageValidator.new
     #   msg = { message: "User created", controller: "UsersController" }
     #   validator.validate(msg)
-    #   # => Hash with all REQUIRED_KEYS present (nil-filled where missing)
+    #   # => Hash with all EXPECTED_KEYS present (nil-filled where missing)
     #
     # @example Validate message with timing
     #   msg = { message: "Request processed", request_time: 125.5, duration: 100.0 }
@@ -32,7 +32,7 @@ module JsonRailsLogger
       #
       # If message is a single-key hash containing only a :message field with string value,
       # returns as-is (treated as pre-formatted message). Otherwise ensures all required keys
-      # from JsonFormatter::REQUIRED_KEYS are present (nil-filled), and normalises timing
+      # from JsonFormatter::EXPECTED_KEYS are present (nil-filled), and normalises timing
       # fields if present (converts request_time floats to millisecond integers).
       #
       # @param msg [Hash] Message hash to validate
@@ -66,7 +66,7 @@ module JsonRailsLogger
 
       # Ensures all required logging keys are present in message hash.
       #
-      # Adds missing keys from JsonFormatter::REQUIRED_KEYS with nil values,
+      # Adds missing keys from JsonFormatter::EXPECTED_KEYS with nil values,
       # supporting both symbol and string key naming conventions.
       #
       # @param msg [Hash] Message hash to check

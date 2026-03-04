@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JsonRailsLogger
-  # Namespace for formatting components used to decompose JSON formatter logic
+  # Namespace for formatting components used to deconstruct JSON formatter logic
   module FormattingComponents
     # Parses raw log message input to detect and extract operational context from log output strings.
     #
@@ -11,7 +11,7 @@ module JsonRailsLogger
     # extracts structured metadata (HTTP method, request path, status code, user-agent);
     # otherwise normalises and cleans the string for safe JSON serialisation.
     #
-    # Used by JsonFormatter to decompose raw_msg input before adding to log payload,
+    # Used by JsonFormatter to deconstruct raw_msg input before adding to log payload,
     # enabling cleaner separation of parsing logic from formatting orchestration.
     #
     # @example Parse a status code message
