@@ -4,8 +4,8 @@
 module JsonRailsLogger
   # This class is the json formatter for our logger
   class JsonFormatter < ::Logger::Formatter
-    ## Required keys to be logged to the output
-    REQUIRED_KEYS = %w[
+    ## Expected keys to be logged to the output
+    EXPECTED_KEYS = %w[
       backtrace
       body
       duration

@@ -74,7 +74,7 @@ module JsonRailsLogger
       #
       def ensure_required_keys(msg)
         msg = msg.to_h if msg.respond_to?(:to_h)
-        JsonFormatter::REQUIRED_KEYS.each do |key|
+        JsonFormatter::EXPECTED_KEYS.each do |key|
           key_sym = key.to_sym
           msg[key_sym] = msg[key_sym] || msg[key.to_s] || nil unless msg.key?(key_sym)
         end
