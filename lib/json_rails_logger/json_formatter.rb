@@ -210,39 +210,9 @@ module JsonRailsLogger
       { request_params: request_params } if request_params.present?
     end
 
-    # Process the raw message input and extract relevant fields based on its content and format
+    # Process the raw message input by delegating to MessageParser
     def process_message(raw_msg)
-      # If the message is nil, return an empty hash
-      return {} if raw_msg.nil?
-
-      # Otherwise, normalise the message
-      msg = normalise_message(raw_msg)
-
-      return msg unless msg.is_a?(String)
-      return status_message(msg) if status_message?(msg)
-      return request_type(msg) if request_type?(msg)
-      return user_agent_message(msg) if user_agent_message?(msg)
-
-      # Clean up the message if it contains special characters
-      msg = remove_unprintable_characters(msg)
-
-      # squish is better than strip as it still returns the string, but first
-      # removing all whitespace on both ends of the string, and then changing
-      # remaining consecutive whitespace groups into one space each. strip only
-      # removes white spaces only at the leading and trailing ends.
-      { message: msg.squish }
-    end
-
-    # Remove unprintable characters from the message to prevent JSON serialization issues and ensure clean log output
-    def remove_unprintable_characters(msg)
-      # Remove ANSI escape codes
-      msg = msg.gsub(/\e\[[0-9;]*m/, '') if msg.match?(/\e\[[0-9;]*m/)
-      # Remove all non-printable characters
-      msg = msg.gsub(/[^[:print:]]/, '') if msg.match?(/[^[:print:]]/)
-      # Remove all non-ASCII characters
-      msg = msg.gsub(/[^\x00-\x7F]/, '') if msg.match?(/[^\x00-\x7F]/)
-
-      msg
+      FormattingComponents::MessageParser.new.parse(raw_msg)
     end
 
     # Format the message by ensuring required fields are present and normalising timing values
@@ -263,61 +233,6 @@ module JsonRailsLogger
       msg.is_a?(Hash) &&
         msg.length == 1 &&
         msg.fetch(:message, nil).is_a?(String)
-    end
-
-    def normalise_message(raw_msg)
-      return raw_msg unless raw_msg.is_a?(String)
-
-      JSON.parse(raw_msg)
-    rescue JSON::ParserError
-      raw_msg
-    end
-
-    def status_message?(msg)
-      # puts "Checking for status message in: #{msg}" if Rails.logger.debug?
-      msg.is_a?(String) &&
-        msg.downcase.match(/status [0-9]+/)
-    end
-
-    def status_message(msg)
-      # puts "Found status message in: #{msg}" if Rails.logger.debug?
-      split_status = msg.split
-      # puts "Split status message: #{split_status}" if Rails.logger.debug?
-      is_status = split_status[0] == 'response:'
-      code = split_status[is_status ? 2 : 1]
-
-      status = code.to_i
-
-      { status: status }
-    end
-
-    def request_type?(msg)
-      # puts "Checking for request type in: #{msg}" if Rails.logger.debug?
-      msg.is_a?(String) &&
-        REQUEST_METHODS.any? { |method| msg.match(/#{method} http\S+/) }
-    end
-
-    def request_type(msg)
-      # puts "Found request type in: #{msg}" if Rails.logger.debug?
-      split_type = msg.split
-      # puts "Split type: #{split_type}" if Rails.logger.debug?
-      is_request = split_type[0] == 'request:'
-      method = split_type[is_request ? 1 : 0]
-      path = split_type[is_request ? 2 : 1]
-      { method: method, path: path }
-    end
-
-    def user_agent_message?(msg)
-      msg.is_a?(String) &&
-        msg.downcase.match(/user-agent: .[\S\s]+accept: .+/m)
-    end
-
-    def user_agent_message(msg)
-      splitted_msg = msg.split("\n")
-      user_agent = splitted_msg[0]&.split('"')&.at(1)
-      accept = splitted_msg[1]&.split('"')&.at(1)
-
-      { user_agent: user_agent, accept: accept }
     end
 
     def includes_timing?(msg)
