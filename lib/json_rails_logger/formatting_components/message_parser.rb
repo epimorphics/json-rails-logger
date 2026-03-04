@@ -9,7 +9,7 @@ module JsonRailsLogger
     # detects status codes (e.g. "Status 200"), HTTP request lines (e.g. "GET http://..."),
     # user-agent headers, and plain text messages. When a message matches a known pattern,
     # extracts structured metadata (HTTP method, request path, status code, user-agent);
-    # otherwise normalises and cleans the string for safe JSON serialization.
+    # otherwise normalises and cleans the string for safe JSON serialisation.
     #
     # Used by JsonFormatter to decompose raw_msg input before adding to log payload,
     # enabling cleaner separation of parsing logic from formatting orchestration.

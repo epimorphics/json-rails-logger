@@ -3,7 +3,7 @@
 # Namespace for JSON logger components used by Rails integrations.
 module JsonRailsLogger
   # This class is the json formatter for our logger
-  class JsonFormatter < ::Logger::Formatter # rubocop:disable Metrics/ClassLength
+  class JsonFormatter < ::Logger::Formatter
     ## Required keys to be logged to the output
     REQUIRED_KEYS = %w[
       backtrace
@@ -100,7 +100,7 @@ module JsonRailsLogger
     # @see RequestIdMiddleware
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html#method-i-call
     # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    def call(severity, timestamp, progname, raw_msg)
       sev = process_severity(severity)
       tmstmp = process_timestamp(timestamp)
       prgname = process_progname(progname)
@@ -109,40 +109,11 @@ module JsonRailsLogger
       msg[:level] = sev.ljust(5).squish if sev
       new_msg = format_message(msg).transform_keys(&:to_sym)
 
-      # * Start building the payload with the timestamp and then merge in the other fields as they are processed
-      payload = { ts: tmstmp }
-
-      # Append request context details to the message when present
-      if new_msg[:action].present? || new_msg[:controller].present?
-        new_msg[:message] = FormattingComponents::RequestMessageComposer.new.include_component_details(new_msg)
-        new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
-      end
-
-      # * Add the request time to the message if it is present and does not
-      #   already contain it
-      if new_msg[:request_time].present? && new_msg[:message].present? && !new_msg[:message].include?(', time taken:') # rubocop:disable Layout/LineLength
-        new_msg[:message] += format(', time taken: %.0f ms', new_msg[:request_time])
-        seconds, milliseconds = new_msg[:request_time].to_i.divmod(1000)
-        new_msg[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
-      end
-
-      # * Merge in request context from thread storage (request_id, query_string,
-      #   request_params). This ensures that we capture the most relevant request
-      #   metadata for log analysis.
-      payload.merge!(FormattingComponents::RequestContext.collect)
-      payload.merge!(new_msg.sort.to_h.compact)
-
-      # * Reorder so ts and level come first after all processing is done
-      final_payload = {
-        ts: payload[:ts],
-        level: payload[:level]
-      }.merge(payload.except(:ts, :level))
-
-      # * Convert the final payload to JSON and add a newline character at the
-      #   end for better readability in the logs
-      "#{final_payload.to_json}\n"
-    rescue JSON::NestingError
-      raise JSON::GeneratorError, 'circular reference detected'
+      # Delegate payload assembly and serialization to PayloadBuilder
+      FormattingComponents::PayloadBuilder.new.build(
+        timestamp: tmstmp,
+        message: new_msg
+      )
     end
     # rubocop:enable Metrics/MethodLength
 
