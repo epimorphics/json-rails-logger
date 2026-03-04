@@ -99,8 +99,7 @@ module JsonRailsLogger
     # @see Logger#initialize
     # @see RequestIdMiddleware
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html#method-i-call
-    # rubocop:disable Metrics/MethodLength
-    def call(severity, timestamp, progname, raw_msg)
+    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/MethodLength
       sev = process_severity(severity)
       tmstmp = process_timestamp(timestamp)
       prgname = process_progname(progname)
@@ -115,7 +114,6 @@ module JsonRailsLogger
         message: new_msg
       )
     end
-    # rubocop:enable Metrics/MethodLength
 
     private
 
