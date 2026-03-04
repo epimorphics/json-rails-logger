@@ -35,8 +35,8 @@ sources.
 
 This logger makes use of [lograge](https://github.com/roidrage/lograge) to
 "attempt to tame Rails' default policy". However, we augment the JSON format
-used by lograge to fit our local requirements, and ensure the HTTP request ID
-is logged where available.
+used by lograge to fit our local requirements, and ensure the HTTP request ID is
+logged where available.
 
 ### Gem API Documentation
 
@@ -122,6 +122,48 @@ several reasons:
   even if exceptions occur
 - **No context passing**: The formatter and other components can read the
   request ID without it being passed as a parameter
+
+## Filtering Specific Keys from Logs
+
+The json-rails-logger gem provides built-in support for filtering specific keys
+from log output. This is particularly useful for suppressing verbose or
+repetitive fields that clutter logs without adding diagnostic value, removing
+confidential information such as passwords, API keys, and access tokens that
+might be stored or transmitted outside secure boundaries, and for selective
+debugging — by keeping filtered keys hidden in production whilst optionally
+preserving them under a debug key for troubleshooting and auditing purposes.
+
+### Configuration
+
+Configure filtering when initialising the JsonFormatter in your Rails
+environment config:
+
+```ruby
+# config/environments/production.rb
+
+# Option 1: Remove sensitive keys entirely (default)
+config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::JsonFormatter.new(
+  filtered_keys: ['password', 'api_key', 'token'],
+  keep_filtered_keys: false
+))
+# Output: {"ts":"...","level":"INFO","message":"User logged in"}
+
+# Option 2: Remove keys but preserve under :_filtered for debugging
+config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::JsonFormatter.new(
+  filtered_keys: ['password', 'api_key'],
+  keep_filtered_keys: true
+))
+# Output: {"ts":"...","level":"INFO","message":"User logged in","_filtered":{"password":"secret123","api_key":"xyz789"}}
+
+# Option 3: No filtering (default)
+config.logger = JsonRailsLogger::Logger.new(STDOUT)
+```
+
+> [!IMPORTANT]
+> **Key matching** is exact and case-sensitive. Both string and symbol keys are
+> supported (`['password']` and `[:password]` are equivalent). The `_filtered`
+> key only appears when `keep_filtered_keys: true` **and** at least one key was
+> filtered.
 
 ## GitHub package registry
 

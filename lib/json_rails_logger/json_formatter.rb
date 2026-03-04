@@ -34,16 +34,47 @@ module JsonRailsLogger
     # that includes extracted request metadata, status codes, user agent information,
     # and other relevant fields for operational monitoring.
     #
+    # Optionally configures key filtering to remove sensitive or noisy data from logs:
+    # - filtered_keys: Array of key names/patterns to filter from output (default: empty array)
+    # - keep_filtered_keys: Boolean to preserve filtered keys in :_filtered debug key (default: false)
+    #
+    # @param filtered_keys [Array<String, Symbol>, nil] Keys to filter from output.
+    #   When provided, matching keys are either removed or preserved in :_filtered for debugging.
+    #   Default is nil (no filtering).
+    #
+    # @param keep_filtered_keys [Boolean] Whether to preserve filtered keys in debug output.
+    #   When false (default), filtered keys are removed entirely.
+    #   When true, filtered keys are collected under :_filtered for debugging.
+    #   Only used when filtered_keys is also configured. Default is false.
+    #
     # @return [JsonRailsLogger::JsonFormatter] A configured formatter instance
     #
-    # @example Create formatter
+    # @example Create formatter with no filtering
     #   formatter = JsonRailsLogger::JsonFormatter.new
-    #   formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+    #   # All log output includes all message fields unchanged
+    #
+    # @example Create formatter with filtering (remove sensitive keys)
+    #   formatter = JsonRailsLogger::JsonFormatter.new(
+    #     filtered_keys: ['password', 'api_key', 'token'],
+    #     keep_filtered_keys: false
+    #   )
+    #   # Log output with password="secret" and api_key="xyz123" will have those keys removed
+    #   # Result: "{"ts":"...","level":"INFO",...}" (password and api_key not included)
+    #
+    # @example Create formatter with filtering and debug output
+    #   formatter = JsonRailsLogger::JsonFormatter.new(
+    #     filtered_keys: ['password', 'api_key'],
+    #     keep_filtered_keys: true
+    #   )
+    #   # Matching keys are moved to :_filtered for debugging
+    #   # Result: "{"ts":"...","level":"INFO",...,"_filtered":{"password":"secret","api_key":"xyz123"}}"
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize(**_opts)
-      super # dont pass any arguments to the parent class as it does not expect any
+    def initialize(filtered_keys: nil, keep_filtered_keys: false, **_opts)
+      super() # call parent without passing any arguments as it does not accept any
       self.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+      @filtered_keys = filtered_keys
+      @keep_filtered_keys = keep_filtered_keys
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis
@@ -109,7 +140,10 @@ module JsonRailsLogger
       new_msg = FormattingComponents::MessageValidator.new.validate(msg).transform_keys(&:to_sym)
 
       # Delegate payload assembly and serialisation to PayloadBuilder
-      FormattingComponents::PayloadBuilder.new.build(
+      FormattingComponents::PayloadBuilder.new(
+        filtered_keys: @filtered_keys,
+        keep_filtered_keys: @keep_filtered_keys
+      ).build(
         timestamp: tmstmp,
         message: new_msg
       )
