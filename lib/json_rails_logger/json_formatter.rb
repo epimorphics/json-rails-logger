@@ -114,7 +114,7 @@ module JsonRailsLogger
 
       # Append request context details to the message when present
       if new_msg[:action].present? || new_msg[:controller].present?
-        new_msg[:message] = append_request_details(new_msg)
+        new_msg[:message] = FormattingComponents::RequestMessageComposer.new.include_component_details(new_msg)
         new_msg[:request_status] = 'completed' if new_msg[:request_status].nil?
       end
 
@@ -243,32 +243,6 @@ module JsonRailsLogger
       msg = msg.gsub(/[^\x00-\x7F]/, '') if msg.match?(/[^\x00-\x7F]/)
 
       msg
-    end
-
-    # Builds a message from controller and action names
-    def build_controller_action_message(action, controller, original_message)
-      return original_message if action.blank? || controller.blank?
-
-      controller_name = controller.to_s.gsub('Controller', '').split('::').last
-      "#{controller_name} #{action} request complete"
-    end
-
-    # Appends request URI to the message when available.
-    def append_request_uri(message, request_uri)
-      return message if request_uri.blank?
-
-      # If request_uri is present, append it to the message for better context
-      message + format(' to %s', request_uri)
-    end
-
-    # Appends request context information to the log message
-    def append_request_details(msg)
-      action = msg['action'] || msg[:action]
-      controller = msg['controller'] || msg[:controller]
-      request_uri = msg['request_uri'] || msg[:request_uri]
-
-      tmp_msg = build_controller_action_message(action, controller, msg[:message]) || ''
-      append_request_uri(tmp_msg, request_uri)
     end
 
     # Format the message by ensuring required fields are present and normalising timing values
