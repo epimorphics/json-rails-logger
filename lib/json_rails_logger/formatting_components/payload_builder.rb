@@ -74,7 +74,7 @@ module JsonRailsLogger
 
       # Enriches message with controller/action context and request timing information.
       #
-      # If message contains controller or action fields, delegates to RequestMessageComposer
+      # If message contains controller or action fields, delegates to MessageComposer
       # to build human-readable message string. If request_time is present, formats and
       # appends timing information to the message string.
       #
@@ -87,7 +87,7 @@ module JsonRailsLogger
 
         # Append request context details to the message when present
         if enriched[:action].present? || enriched[:controller].present?
-          enriched[:message] = FormattingComponents::RequestMessageComposer.new.include_component_details(enriched)
+          enriched[:message] = FormattingComponents::MessageComposer.new.include_component_details(enriched)
           enriched[:request_status] = 'completed' if enriched[:request_status].nil?
         end
 

@@ -10,7 +10,7 @@ module JsonRailsLogger
     # systems, ensuring log output can be easily interpreted by operations teams.
     #
     # @example Basic usage
-    #   composer = RequestMessageComposer.new
+    #   composer = MessageComposer.new
     #   msg_data = { controller: 'DatasetsController', action: 'index' }
     #   result = composer.include_component_details(msg_data)
     #   # => "Datasets index request complete"
@@ -23,7 +23,7 @@ module JsonRailsLogger
     #   }
     #   result = composer.include_component_details(msg_data)
     #   # => "Datasets show request complete to /datasets/123"
-    class RequestMessageComposer
+    class MessageComposer
       # Includes request context information in the log message.
       #
       # Extracts controller, action, and request URI from the message data and
