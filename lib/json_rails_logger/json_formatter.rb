@@ -107,9 +107,9 @@ module JsonRailsLogger
       msg = process_message(raw_msg)
       msg[:progname] = prgname if prgname
       msg[:level] = sev.ljust(5).squish if sev
-      new_msg = format_message(msg).transform_keys(&:to_sym)
+      new_msg = FormattingComponents::MessageValidator.new.validate(msg).transform_keys(&:to_sym)
 
-      # Delegate payload assembly and serialization to PayloadBuilder
+      # Delegate payload assembly and serialisation to PayloadBuilder
       FormattingComponents::PayloadBuilder.new.build(
         timestamp: tmstmp,
         message: new_msg
@@ -134,15 +134,6 @@ module JsonRailsLogger
       format_datetime(timestamp.utc)
     end
 
-    def ensure_required_keys(msg)
-      msg = msg.to_h if msg.respond_to?(:to_h)
-      REQUIRED_KEYS.each do |key|
-        key_sym = key.to_sym
-        msg[key_sym] = msg[key_sym] || msg[key.to_s] || nil unless msg.key?(key_sym)
-      end
-      msg
-    end
-
     # Process progname to remove the last space if it exists
     # @param progname [String] - Program name to include in log messages.
     # This is needed because the Rails logger adds a space at the end of the progname
@@ -162,47 +153,6 @@ module JsonRailsLogger
     # Process the raw message input by delegating to MessageParser
     def process_message(raw_msg)
       FormattingComponents::MessageParser.new.parse(raw_msg)
-    end
-
-    # Format the message by ensuring required fields are present and normalising timing values
-    def format_message(msg)
-      return msg if string_message_field?(msg)
-      return {} unless msg.is_a?(Enumerable)
-
-      msg = ensure_required_keys(msg)
-      msg = normalise_timing(msg) if includes_timing?(msg)
-
-      msg
-    end
-
-    # Check if the message is a hash with a single key :message with a string value
-    # @param msg [Hash] the message to check
-    # @return [Boolean] true if the message is a hash with a single key :message with a string value, false otherwise
-    def string_message_field?(msg)
-      msg.is_a?(Hash) &&
-        msg.length == 1 &&
-        msg.fetch(:message, nil).is_a?(String)
-    end
-
-    def includes_timing?(msg)
-      msg.key?('duration') ||
-        msg.key?(:duration) ||
-        msg.key?('request_time') ||
-        msg.key?(:request_time)
-    end
-
-    # If request_time is a float, convert it to an integer as milliseconds µs -> ms
-    # Duration is already in milliseconds from Lograge, so preserve it as-is
-    def normalise_timing(msg)
-      result = msg.to_h { |k, v| [k, v] }
-
-      if result[:request_time].nil? && result[:duration].is_a?(Float)
-        result[:request_time] = result[:duration].round(0)
-      elsif result[:request_time].is_a?(Float)
-        result[:request_time] = result[:request_time].round(0)
-      end
-
-      result
     end
   end
 end
