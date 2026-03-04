@@ -62,7 +62,14 @@ then opens `doc/index.html` in your browser. The generated docs are particularly
 useful when integrating the gem into complex Rails applications or when
 troubleshooting unexpected logging behaviour.
 
-## Using with a Rails application
+## Installation
+
+This gem is published to the Epimorphics [GitHub Package
+Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry).
+You'll need to authenticate Bundler with a personal access token (PAT) to fetch
+the gem. See [GitHub Package Registry
+Authentication](CONTRIBUTING.md#github-package-registry-authentication) in
+CONTRIBUTING.md for setup instructions.
 
 In your Rails app, add this to your `Gemfile`:
 
@@ -159,102 +166,18 @@ config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
 
-> [!IMPORTANT]
-> **Key matching** is exact and case-sensitive. Both string and symbol keys are
-> supported (`['password']` and `[:password]` are equivalent). The `_filtered`
-> key only appears when `keep_filtered_keys: true` **and** at least one key was
-> filtered.
+> [!IMPORTANT] **Key matching** is exact and case-sensitive. Both string and
+> symbol keys are supported (`['password']` and `[:password]` are equivalent).
+> The `_filtered` key only appears when `keep_filtered_keys: true` **and** at
+> least one key was filtered.
 
-## GitHub package registry
+## Contributing
 
-This gem is published via the Epimorphics instance of the
-[GitHub Package Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry).
-This allows us to publish and use Rubygems that we create, in our own apps,
-without having to pubish via the public `rubygems.org`, or wire-in direct
-references to GitHub repos in our `Gemfile`s.
+For information on setting up a development environment, running tests,
+generating documentation, and publishing releases, see
+[CONTRIBUTING.md](CONTRIBUTING.md)
 
-Access to the GihHub package registry is authorised via a _personal access
-token_ (PAT), which is usually stored in `.github-token` in the project's
-root directory. Bundler will need to configured to use the PAT when fetching
-gems from the Epimorphics package registry. By convention, there should be
-a convenient `Makefile` target to help developers to both store the PAT and
-authorise Bundler:
-
-```sh
-make auth
-```
-
-When run for the first time, this will ask for your PAT. See
-[notes on the internal wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
-about creating a PAT.
-
-See also notes on making a release of the gem, below.
-
-## Developer notes
-
-After cloning the repo, to install all dependecies, first execute
-
-   make assets
-
-### Linting the code
-
-To check forrmatting and use, execute
-
-   make lint
-
-Rubocop should produce no warnings.
-
-### Running the tests
-
-Tests are located in the `./test/` folder.
-
-To run the tests, use
-
-   make test
-
-#### One step check
-
-You can also runs both linting and tests using
-
-   make check
-
-### `Makefile`
-
-There is a `Makefile` with some shared dev tasks.
-
-To check that the gem will build correctly: `make build`
-
-To create the GitHub and Bundler authorisations: `make auth`
-
-To publish the gem to the GitHub package registry: `make publish`
-
-### API Documentation
-
-The gem includes comprehensive YARD documentation on all public methods:
-
-- **In your IDE**: Hover over `Logger.new` or `JsonFormatter.call` to see
-  parameter types and usage examples
-- **As HTML docs**: Run `make doc` to generate human-readable API reference in
-  `doc/index.html`
-
-This documentation includes parameter types, return values, example usage, and
-cross-references to Rails and Ruby stdlib documentation.
-
-### Publishing a new version of the gem
-
-To publish a new version of the gem after a bugfix or feature addition:
-
-1. Ensure that the version in `lib/json_rails_logger/version.rb` has
-   been updated to reflect the correct semver representing the change
-2. Update the `CHANGELOG.md` to document the new change
-3. `git tag` the new state with a tag that matches the new version
-4. Push the new tagged release to GitHub
-5. Run `make publish` to push the new gem to the GitHub package registry.
-
-Pushing a tagged version will automatically trigger the publish gem
-workflow, which should result in the gem appearing on the
-[list of releases](https://github.com/epimorphics/json-rails-logger/releases)
-
----
-
-[^1]: <https://guides.rubyonrails.org/plugins.html#using-the-railtie> "Rails Guides: Using the Railtie – A Railtie is a mechanism to hook into Rails' initialization process, allowing gems to run setup code automatically when Rails boots"
+[^1]: <https://guides.rubyonrails.org/plugins.html#using-the-railtie> "Rails
+    Guides: Using the Railtie – A Railtie is a mechanism to hook into Rails'
+    initialization process, allowing gems to run setup code automatically when
+    Rails boots"
