@@ -166,7 +166,8 @@ config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
 
-> [!IMPORTANT] **Key matching** is exact and case-sensitive. Both string and
+> [!IMPORTANT]
+> **Key matching** is exact and case-sensitive. Both string and
 > symbol keys are supported (`['password']` and `[:password]` are equivalent).
 > The `_filtered` key only appears when `keep_filtered_keys: true` **and** at
 > least one key was filtered.
