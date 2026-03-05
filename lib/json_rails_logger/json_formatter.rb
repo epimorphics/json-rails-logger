@@ -2,7 +2,7 @@
 
 # Namespace for JSON logger components used by Rails integrations.
 module JsonRailsLogger
-  # This class is the json formatter for our logger
+  # This class is the JSON formatter for our logger
   class JsonFormatter < ::Logger::Formatter
     ## Expected keys to be logged to the output
     EXPECTED_KEYS = %w[
