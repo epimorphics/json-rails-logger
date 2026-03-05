@@ -180,7 +180,7 @@ module JsonRailsLogger
       # 2. Removes all non-printable characters
       # 3. Removes all non-ASCII characters (outside 0x00-0x7F range)
       #
-      # Ensures clean UTF-8 compatible output safe for JSON serialization.
+      # Ensures clean UTF-8 compatible output safe for JSON serialisation.
       #
       # @param msg [String] Message to clean
       # @return [String] Cleaned message with unprintable characters removed

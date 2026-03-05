@@ -126,7 +126,7 @@ module JsonRailsLogger
         final_payload = reorder_payload(payload)
 
         # Convert to JSON and add newline
-        serialize_payload(final_payload)
+        serialise_payload(final_payload)
       rescue JSON::NestingError
         raise JSON::GeneratorError, 'circular reference detected'
       end
@@ -216,12 +216,12 @@ module JsonRailsLogger
         }.merge(payload.except(:ts, :level))
       end
 
-      # Serializes payload to JSON with trailing newline.
+      # Serialises payload to JSON with trailing newline.
       #
-      # @param payload [Hash] Payload to serialize
+      # @param payload [Hash] Payload to serialise
       # @return [String] JSON string with trailing newline
       #
-      def serialize_payload(payload)
+      def serialise_payload(payload)
         "#{payload.to_json}\n"
       end
     end
