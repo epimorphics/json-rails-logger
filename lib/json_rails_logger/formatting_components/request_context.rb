@@ -65,8 +65,8 @@ module JsonRailsLogger
       # @api private
       #
       def self.query_string
-        query_string = Thread.current[JsonRailsLogger::QUERY_STRING]
-        { query_string: query_string } if query_string.present?
+        qs = Thread.current[JsonRailsLogger::QUERY_STRING]
+        { query_string: qs } if qs.present?
       end
 
       # Extract the request parameters from thread storage.
@@ -77,9 +77,9 @@ module JsonRailsLogger
       # @api private
       #
       def self.request_params
-        request_params = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
-        request_params ||= Thread.current[JsonRailsLogger::PARAMS]
-        { request_params: request_params } if request_params.present?
+        rp = Thread.current[JsonRailsLogger::REQUEST_PARAMS]
+        rp ||= Thread.current[JsonRailsLogger::PARAMS]
+        { request_params: rp } if rp.present?
       end
 
       private_class_method :request_id, :query_string, :request_params
