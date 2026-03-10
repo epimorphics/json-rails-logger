@@ -265,16 +265,21 @@ module JsonRailsLogger
       { message: msg.squish }
     end
 
-    # Remove unprintable characters from the message to prevent JSON serialization issues and ensure clean log output
+    # Sanitises a log message string by stripping terminal escape sequences,
+    # non-printable control characters, and non-ASCII characters. Applied in
+    # that order so that ANSI codes (which contain control characters) are
+    # removed before the broader non-printable pass runs.
+    #
+    # This ensures that all output is safe to serialise as JSON and readable
+    # across all log consumers regardless of their encoding support.
+    #
+    # @param msg [String] the raw message string to sanitise
+    # @return [String] the sanitised message string
     def remove_unprintable_characters(msg)
-      # Remove ANSI escape codes
-      msg = msg.gsub(/\e\[[0-9;]*m/, '') if msg.match?(/\e\[[0-9;]*m/)
-      # Remove all non-printable characters
-      msg = msg.gsub(/[^[:print:]]/, '') if msg.match?(/[^[:print:]]/)
-      # Remove all non-ASCII characters
-      msg = msg.gsub(/[^\x00-\x7F]/, '') if msg.match?(/[^\x00-\x7F]/)
-
       msg
+        .gsub(/\e\[[0-9;]*m/, '')
+        .gsub(/[^[:print:]]/, '')
+        .gsub(/[^\x00-\x7F]/, '')
     end
 
     # Process ignored keys to create a more user-friendly message for completed requests, including the controller, action, and request URI if available
