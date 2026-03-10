@@ -125,7 +125,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output).must_include('status')
   end
 
-  it 'should place ts and level first in JSON output' do
+  it 'should place ts, level, and message first in JSON output' do
     message = 'Status 200'
 
     log_output = fixture.call('INFO', timestamp, progname, message)
@@ -134,6 +134,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     keys = json_output.keys
     _(keys[0]).must_equal('ts')
     _(keys[1]).must_equal('level')
+    _(keys[2]).must_equal('message')
   end
 
   it 'should maintain consistent required fields regardless of ignored inclusion' do
