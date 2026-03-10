@@ -231,8 +231,8 @@ module JsonRailsLogger
 
     # Extract the query string from thread storage and include it in the log output if present
     def query_string
-      query_string ||= Thread.current[JsonRailsLogger::QUERY_STRING]
-      { query_string: query_string } if query_string.present?
+      qs = Thread.current[JsonRailsLogger::QUERY_STRING]
+      { query_string: qs } if qs.present?
     end
 
     # Extract the request parameters from thread storage and include them in the log output if present and query string is blank
