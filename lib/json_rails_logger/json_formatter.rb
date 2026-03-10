@@ -172,7 +172,8 @@ module JsonRailsLogger
       final_payload = {
         ts: payload[:ts],
         level: payload[:level]
-      }.merge(payload.except(:ts, :level))
+        message: payload[:message]
+      }.merge(payload.except(:ts, :level,:message))
 
       # * Convert the final payload to JSON and add a newline character at the end for better readability in the logs
       "#{final_payload.to_json}\n"

@@ -20,8 +20,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Restructured JSON payload assembly to prioritise `ts` and `level` fields at
-  output.
+- Restructured JSON payload assembly to prioritise `ts`, `level`, and `message`
+  fields at output.
 - Simplified request completion messages to use single-line format with
   controller and action.
 - Included log level in required log fields for consistent output.
