@@ -122,7 +122,7 @@ module JsonRailsLogger
         # Apply key filtering if configured
         payload = apply_filtering(payload) if @filtered_keys.any?
 
-        # Reorder so ts and level come first after all processing is done
+        # Reorder so ts, level and message come first after all processing is done
         final_payload = reorder_payload(payload)
 
         # Convert to JSON and add newline
@@ -207,13 +207,14 @@ module JsonRailsLogger
       # improved readability and parsing efficiency.
       #
       # @param payload [Hash] Unordered payload hash
-      # @return [Hash] Reordered payload with ts and level first
+      # @return [Hash] Reordered payload with ts, level, and message first
       #
       def reorder_payload(payload)
         {
           ts: payload[:ts],
-          level: payload[:level]
-        }.merge(payload.except(:ts, :level))
+          level: payload[:level],
+          message: payload[:message]
+        }.merge(payload.except(:ts, :level, :message).sort.to_h)
       end
 
       # Serialises payload to JSON with trailing newline.
