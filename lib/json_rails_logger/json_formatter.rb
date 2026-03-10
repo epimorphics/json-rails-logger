@@ -168,12 +168,12 @@ module JsonRailsLogger
       payload.merge!(new_msg.sort.to_h.except!(:ignored).compact)
       payload.merge!(new_msg[:ignored]) if @include_ignored_keys && new_msg[:ignored].present?
 
-      # * Reorder so ts and level come first after all processing is done
+      # * Reorder so ts, level, and message come first after all processing is done
       final_payload = {
         ts: payload[:ts],
         level: payload[:level],
         message: payload[:message]
-      }.merge(payload.except(:ts, :level, :message))
+      }.merge(payload.except(:ts, :level, :message).sort.to_h)
 
       # * Convert the final payload to JSON and add a newline character at the end for better readability in the logs
       "#{final_payload.to_json}\n"
