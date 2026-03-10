@@ -186,14 +186,10 @@ module JsonRailsLogger
       # @return [String] Cleaned message with unprintable characters removed
       #
       def remove_unprintable_characters(msg)
-        # Remove ANSI escape codes
-        msg = msg.gsub(/\e\[[0-9;]*m/, '') if msg.match?(/\e\[[0-9;]*m/)
-        # Remove all non-printable characters
-        msg = msg.gsub(/[^[:print:]]/, '') if msg.match?(/[^[:print:]]/)
-        # Remove all non-ASCII characters
-        msg = msg.gsub(/[^\x00-\x7F]/, '') if msg.match?(/[^\x00-\x7F]/)
-
         msg
+          .gsub(/\e\[[0-9;]*m/, '')
+          .gsub(/[^[:print:]]/, '')
+          .gsub(/[^\x00-\x7F]/, '')
       end
     end
   end
