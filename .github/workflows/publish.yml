@@ -37,7 +37,7 @@ jobs:
         files: |
           json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
 
-  release:
+  publish:
     name: "Publish gem to Epimorphics RubyGems repository"
     needs: build
     runs-on: ubuntu-latest
