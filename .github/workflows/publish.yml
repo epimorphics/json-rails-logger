@@ -36,15 +36,7 @@ jobs:
         prerelease: false
         files: |
           json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
-    outputs:
-      version: ${{ steps.gitinfo.outputs.version }}
 
-  release:
-    name: "Publish gem to Epimorphics RubyGems repository"
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
     - name: "Publish gem"
       run: |
         PAT=${{ secrets.GITHUB_TOKEN }} make publish
-
