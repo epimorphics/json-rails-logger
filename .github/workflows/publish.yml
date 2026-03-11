@@ -35,7 +35,7 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          data_services_api-${{ steps.gitinfo.outputs.version }}.gem
+          json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
 
     - name: "Publish gem"
       run: |
