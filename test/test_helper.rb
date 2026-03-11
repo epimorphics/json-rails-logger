@@ -5,6 +5,11 @@ $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 # enable if required during debugging
 # require 'byebug'
 
+require 'simplecov'
+SimpleCov.start do
+  add_filter '/test/'
+end
+
 require 'minitest/autorun'
 
 require 'logger'

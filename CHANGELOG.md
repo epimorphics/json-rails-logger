@@ -1,95 +1,153 @@
-# Changelog for the JSON Rails Logger gem
+# Changelog
 
-## 2.2.0 - 2025-09
+All notable changes to this project will be documented in this file.
 
-- Enhanced status and request type parsing logic
-- Added handling to skip formatting when optional data missing
-- Included checks for log message prefixes
-- Added debug log statements (commented out) for easier tracing
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic
+Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 2.1.0 - 2025-09
+## [2.3.0] - 2026-02
 
-- Updated ruby version and dependency versions to latest compatible releases
-- Added new development gems for rake task linting and debugging
-- Improved logging formatter logic for clearer and safer log output, removing
-  unsafe string concatenation
-- Refined log message format for action/controller outputs
-- Updated code comments for accuracy and clarity
-- Incremented version to reflect feature and refactor changes
+### Added
 
-## 2.0.6 - 2025-05
+- Made ignored fields configurable via `include_ignored_keys` initialiser
+  parameter (defaults to `false` for backward compatibility).
+- Implemented test coverage for ignored field inclusion modes (enabled/disabled
+  configurations).
+- Included test coverage reporting via SimpleCov.
+- Added YARD documentation workflow with versioned outputs for improved release
+  documentation.
 
-- (Jon) Improves severity level processing by mapping numeric and string levels
-  to standard values.
-- (Jon) Processes the program name and removes trailing spaces for valid JSON.
-- (Jon) Handles nil messages gracefully to prevent errors.
-- (Jon) Standardises Webpacker log level to DEBUG for filtering.
-- (Jon) Suppresses colourised output and original logs.
-- (Jon) Updates timestamp variable name for clarity.
-- (Jon) Adds progname to the logged message.
-- (Jon) Left-justifies the log level in the payload.
-- (Jon) Documents how to configure the custom JSON formatter.
+### Changed
 
-## 2.0.5 - 2025-04
+- Restructured JSON payload assembly to prioritise `ts`, `level`, and `message`
+  fields at output.
+- Simplified request completion messages to use single-line format with
+  controller and action.
+- Included log level in required log fields for consistent output.
+- Updated request completion messages to include path, controller, and action.
+- Simplified payload assembly to build from timestamp before merging fields.
+- Updated framework and libraries via Railties update to 8.1.2 for
+  compatibility.
 
-- (Jon) Added a new method `remove_unprintable_characters` to filter out
-  unprintable and non-ASCII characters from log messages.
-- (Jon) Updated the `call` method to include the new
-  `remove_unprintable_characters` method, ensuring that log messages are cleaned
-  before being logged.
+### Fixed
 
-## 2.0.4 - 2025-04
+- Fixed log level assignment to handle nil severity values gracefully without
+  truncation errors.
+- Trimmed extraneous whitespace from log level field with `squish`.
+- Fixed request params being logged under the wrong key.
+- Fixed request time formatting when milliseconds are provided as floats.
+- Fixed query string handling when it is missing to avoid errors.
 
-- (Jon) Extracted the optional messages and `request_time` formatting logic to
-  improve readability and maintainability.
-- (Jon) Added a new method `process_optional_messages` to handle the formatting
-  of the optional messages.
-- (Jon) Updated the `call` method to include the new `process_optional_messages`
-  method, ensuring that the optional messages are processed correctly.
-- (Jon) Separated the request time formatting into its own block to improve
-  readability and maintainability.
-- (Jon) Updated .rubocop.yml to ignore long comments to reduce noise in the
-  CI/CD pipeline
+## [2.2.0] - 2025-09
 
-## 2.0.3 - 2025-03
+### Added
 
-- (Jon) Enhance logging with request time formatting
-  - Added conditional check for request time presence
-  - Improved request time format to include seconds and milliseconds
-  - Updated log message structure for clarity
-- (Jon) Added pre-commit and pre-push hooks to the gem to ensure the code is
-  linted and tested before being committed or pushed to the repository.
-- (Jon) Added detailed logging for completed actions, including the action name,
-  controller, and request time. Updated log level to 'DEBUG' for these messages
-  if not already set.
-- (Jon) Changed how new messages are merged into the payload by sorting them
-  before excluding optional fields. This should help maintain a consistent order
-  in the logged output.
-- (Jon) Changed the message formatting to transform keys into symbols for better
-  consistency and usability.
-- (Jon) Updated logging level for Webpacker messages to DEBUG for additional
-  filtering capability
+- Added debug log statements for easier tracing.
 
-## 2.0.2 - 2025-02
+### Changed
 
-- (Jon) Added new required keys for logging: message, method, path, etc.
-- (Jon) Moved some keys to optional and updated their handling.
-- (Jon) Improved payload formatting based on log severity in development.
-- (Jon) Introduced a new method for fetching request parameters.
-- (Jon) Enhanced duration normalisation logic.
+- Enhanced status and request type parsing logic.
+- Refined message formatting to skip when optional data is missing.
+- Added checks for log message prefixes to improve parsing.
 
-## 2.0.1 - 2024-12
+## [2.1.0] - 2025-09
 
-- (Bogdan) Regenerated `Gemfile.lock`
+### Added
 
-## 2.0.0 - 2024-12
+- Added new development gems for rake task linting and debugging.
 
-- (Jon) Updated the gemspec for the required ruby version to 3.0.0 to ensure the
-  gem is up to date with the latest ruby version
-- (Jon) Updated the gemspec to ensure the railties gem is locked to the 7.0
-  rails version to avoid any potential issues with the gem being used
-- (Jon) Updated the logging to include the `request_id` in the JSON output to
-  ensure the values are always logged to the system tooling.
+### Changed
+
+- Updated Ruby version compatibility to latest compatible releases.
+- Updated dependency versions to latest compatible releases.
+- Improved logging formatter logic for clearer and safer output.
+- Refined log message format for action/controller outputs.
+- Updated code comments for accuracy and clarity.
+
+## [2.0.6] - 2025-05
+
+### Added
+
+- Added graceful nil message handling.
+- Added progname to logged messages.
+
+### Changed
+
+- Improved severity level processing with mapping for numeric and string levels.
+- Enhanced program name processing with trailing space removal.
+- Standardised Webpacker log level to DEBUG for filtering.
+- Refined timestamp variable naming for clarity.
+- Improved log level formatting with left-justification in payload.
+- Suppressed colourised output and original logs.
+- Added documentation for custom JSON formatter configuration.
+
+## [2.0.5] - 2025-04
+
+### Added
+
+- Added `remove_unprintable_characters` method to filter unprintable and
+  non-ASCII characters.
+
+### Changed
+
+- Updated the `call` method to filter log messages before logging.
+
+## [2.0.4] - 2025-04
+
+### Changed
+
+- Extracted optional messages and request_time formatting logic into dedicated
+  methods for improved readability.
+- Separated request time formatting logic to improve maintainability.
+- Updated rubocop configuration to ignore long comments.
+
+## [2.0.3] - 2025-03
+
+### Added
+
+- Added pre-commit and pre-push hooks to enforce linting and testing.
+
+### Changed
+
+- Enhanced request time formatting with conditional checks and
+  seconds/milliseconds display.
+- Improved action logging to include action name, controller, and request time.
+- Updated log level in certain messages to DEBUG for better filtering.
+- Refined payload merging to sort messages before excluding optional fields.
+- Changed message key transformation to symbols for consistency.
+
+## [2.0.2] - 2025-02
+
+### Added
+
+- Added new required keys for logging (message, method, path, etc.).
+- Introduced request parameters fetching method.
+
+### Changed
+
+- Reorganised key categories to distinguish required from optional keys.
+- Improved payload formatting based on log severity in development.
+- Enhanced duration normalisation logic.
+
+## [2.0.1] - 2024-12
+
+### Changed
+
+- Regenerated Gemfile.lock with latest dependency versions.
+
+## [2.0.0] - 2024-12
+
+### Added
+
+- Added request_id to JSON output for integration with system tooling.
+
+### Changed
+
+- Updated required Ruby version to 3.0.0 in gemspec.
+- Updated railties dependency to Rails 7.0 for compatibility.
+
+---
 
 ## 1.1.1 - 2024-10
 

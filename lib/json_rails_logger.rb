@@ -10,7 +10,7 @@ require_relative 'json_rails_logger/error'
 require_relative 'json_rails_logger/logger'
 require_relative 'json_rails_logger/version'
 
-# A custom rails logger that outputs json instead of raw text
+# A custom rails log formatter that outputs json instead of raw text
 module JsonRailsLogger
   def self.setup(app)
     return if enabled?(app)

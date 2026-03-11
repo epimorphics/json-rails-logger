@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name        = 'json_rails_logger'
   spec.version     = JsonRailsLogger::VERSION
   spec.summary     = 'JSON Rails Logger'
-  spec.description = 'A custom rails logger that outputs JSON instead of raw text'
+  spec.description = 'A custom rails log formatter that outputs JSON instead of raw text'
   spec.authors     = ['Epimorphics Ltd', 'Bogdan-Adrian Marc']
   spec.email       = 'info@epimorphics.com'
   spec.homepage    = 'https://github.com/epimorphics/json-rails-logger'
@@ -27,7 +27,10 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'json'
-  spec.add_dependency 'lograge'
-  spec.add_dependency 'railties'
+  # Runtime dependencies for this gem are ALSO included in the Gemfile's
+  # :maintenance group to allow bundler to validate when running the `bundle
+  # outdated --only-explicit` from the `make update` target.
+  spec.add_dependency 'json', '>= 1.8', '< 5.0'      # works back to Ruby 2.x era
+  spec.add_dependency 'lograge', '>= 0.10', '< 2.0'  # older but stable
+  spec.add_dependency 'railties', '>= 6.0', '< 9.0'  # broadest Rails compatibility
 end
