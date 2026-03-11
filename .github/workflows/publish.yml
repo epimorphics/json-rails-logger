@@ -1,4 +1,3 @@
-
 name: Release and Publish Gem
 on:
   workflow_dispatch: {}
@@ -20,6 +19,7 @@ jobs:
         echo name=${GITHUB_REF#refs/*/}       | tee -a $GITHUB_OUTPUT
         echo branch=${GITHUB_REF#refs/heads/} | tee -a $GITHUB_OUTPUT
         make tags                             | tee -a $GITHUB_OUTPUT
+
     - name: "Build gem"
       run: "make gem"
 
@@ -36,7 +36,13 @@ jobs:
         prerelease: false
         files: |
           json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
-          
+
+  release:
+    name: "Publish gem to Epimorphics RubyGems repository"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
     - name: "Publish gem"
       run: |
         PAT=${{ secrets.GITHUB_TOKEN }} make publish
+
