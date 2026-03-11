@@ -70,11 +70,24 @@ module JsonRailsLogger
     #   # Result: "{"ts":"...","level":"INFO",...,"_filtered":{"password":"secret","api_key":"xyz123"}}"
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize(filtered_keys: nil, keep_filtered_keys: false, **_opts)
+    def initialize(
+      filtered_keys: nil,
+      keep_filtered_keys: false,
+      parser: FormattingComponents::MessageParser.new,
+      validator: FormattingComponents::MessageValidator.new,
+      payload_builder_factory: nil,
+      **_opts
+    )
       super() # call parent without passing any arguments as it does not accept any
       self.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-      @filtered_keys = filtered_keys
-      @keep_filtered_keys = keep_filtered_keys
+      @parser = parser
+      @validator = validator
+      @payload_builder_factory = payload_builder_factory || lambda {
+        FormattingComponents::PayloadBuilder.new(
+          filtered_keys: filtered_keys,
+          keep_filtered_keys: keep_filtered_keys
+        )
+      }
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis
@@ -130,61 +143,53 @@ module JsonRailsLogger
     # @see Logger#initialize
     # @see RequestIdMiddleware
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html#method-i-call
-    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/MethodLength
+    def call(severity, timestamp, progname, raw_msg)
       sev = process_severity(severity)
       tmstmp = process_timestamp(timestamp)
       prgname = process_progname(progname)
-      msg = process_message(raw_msg)
+      msg = @parser.parse(raw_msg)
       msg[:progname] = prgname if prgname
       msg[:level] = sev.ljust(5).squish if sev
-      new_msg = FormattingComponents::MessageValidator.new.validate(msg).transform_keys(&:to_sym)
+      new_msg = @validator.validate(msg).transform_keys(&:to_sym)
 
       # Delegate payload assembly and serialisation to PayloadBuilder
-      FormattingComponents::PayloadBuilder.new(
-        filtered_keys: @filtered_keys,
-        keep_filtered_keys: @keep_filtered_keys
-      ).build(
+      @payload_builder_factory.call(
         timestamp: tmstmp,
         message: new_msg
       )
     end
 
+    # Canonical severity mapping for both Logger integer levels and common text aliases.
+    # This keeps log output consistent even when upstream emitters use different labels.
+    SEVERITY_MAP = {
+      0 => 'DEBUG', 'TRACE' => 'DEBUG', 'DEBUG' => 'DEBUG',
+      1 => 'INFO',  'INFO' => 'INFO',
+      2 => 'WARN',  'WARN' => 'WARN',
+      3 => 'ERROR', 'ERROR' => 'ERROR',
+      4 => 'FATAL', 'CRITICAL' => 'FATAL', 'FATAL' => 'FATAL'
+    }.freeze
+
     private
 
+    # Normalises string input (trim + uppercase) before lookup and returns a
+    # stable fallback of 'UNKNOWN' for unmapped values.
     def process_severity(severity)
-      case severity
-      when 0, 'DEBUG', 'TRACE' then 'DEBUG'
-      when 1, 'INFO' then 'INFO'
-      when 2, 'WARN' then 'WARN'
-      when 3, 'ANY', 'UNKNOWN', 'CRITICAL', 'FATAL', 'ERROR' then 'ERROR'
-      else
-        severity
-      end
+      key = severity.is_a?(String) ? severity.strip.upcase : severity
+      SEVERITY_MAP.fetch(key, 'UNKNOWN')
     end
 
+    # Normalises timestamps to UTC before formatting so all log entries use a
+    # consistent, timezone-independent `ts` value.
     def process_timestamp(timestamp)
       format_datetime(timestamp.utc)
     end
 
-    # Process progname to remove the last space if it exists
-    # @param progname [String] - Program name to include in log messages.
-    # This is needed because the Rails logger adds a space at the end of the progname
-    # and we need to remove it to avoid having a space at the end of the JSON string
+    # Normalises progname for JSON output by removing the trailing space Rails
+    # appends, preventing spurious whitespace in emitted log fields.
     def process_progname(progname)
-      # If the progname is nil, return nil
       return if progname.nil?
 
-      # Make sure the progname is a string
-      progname = progname.to_s
-      # Remove the last space if it exists
-      progname = progname[0..-2] if progname[-1] == ' '
-      # Return the progname
-      progname
-    end
-
-    # Process the raw message input by delegating to MessageParser
-    def process_message(raw_msg)
-      FormattingComponents::MessageParser.new.parse(raw_msg)
+      progname.to_s.delete_suffix(' ')
     end
   end
 end
