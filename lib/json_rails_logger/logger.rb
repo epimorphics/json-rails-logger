@@ -13,15 +13,17 @@ module JsonRailsLogger
     # @param logdev [IO, String, File] The output device to write log messages to.
     #   Typically STDOUT for production, or a file path for file-based logging.
     #
-    # @param formatter [Logger::Formatter, nil] Optional formatter instance.
-    #   Defaults to {JsonRailsLogger::JsonFormatter} when not provided.
+    # @param formatter [Logger::Formatter, nil] Optional formatter override.
+    #   Provide this only when replacing the entire formatting strategy.
+    #   When omitted, the logger builds {JsonRailsLogger::JsonFormatter} using
+    #   `filtered_keys:` and `keep_filtered_keys:`.
     #
     # @param filtered_keys [Array<String, Symbol>, nil] Optional key names to
-    #   filter from log output. Used only when formatter is not provided.
+    #   filter from log output when using the built-in formatter.
     #
     # @param keep_filtered_keys [Boolean] Whether filtered keys should be
-    #   preserved under `:_filtered` for debugging. Used only when formatter is
-    #   not provided. Default is false.
+    #   preserved under `:_filtered` for debugging when using the built-in
+    #   formatter. Default is false.
     #
     # @return [JsonRailsLogger::Logger] A configured logger instance
     #
@@ -33,6 +35,12 @@ module JsonRailsLogger
     #     STDOUT,
     #     filtered_keys: %w[password api_key],
     #     keep_filtered_keys: true
+    #   )
+    #
+    # @example With a custom formatter
+    #   config.logger = JsonRailsLogger::Logger.new(
+    #     STDOUT,
+    #     formatter: MyCustomFormatter.new
     #   )
     #
     # @see https://guides.rubyonrails.org/debugging_rails_applications.html#the-logger
