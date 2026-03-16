@@ -173,6 +173,33 @@ config.logger = JsonRailsLogger::Logger.new(
 > The `_filtered` key only appears when `keep_filtered_keys: true` **and** at
 > least one key was filtered.
 
+## Severity Levels
+
+Log severity is normalised according to the following mapping:
+
+| Input | Output |
+|---|---|
+| `DEBUG`, `TRACE`, `0` | `DEBUG` |
+| `INFO`, `1` | `INFO` |
+| `WARN`, `2` | `WARN` |
+| `ERROR`, `3` | `ERROR` |
+| `FATAL`, `CRITICAL`, `4` | `FATAL` |
+| anything else | `UNKNOWN` |
+
+> [!NOTE]
+> Prior to v3.0.0, `FATAL` was mapped to `ERROR`. From v3.0.0 onwards `FATAL`
+> is preserved. If your log pipeline or alerting rules differentiate on
+> severity, you may need to update those rules when upgrading.
+
+## Upgrading from v2.x
+
+| v2.x | v3.x |
+|---|---|
+| `JsonFormatter.new(include_ignored_keys: true)` | No direct equivalent — use `filtered_keys:` to suppress specific noisy fields |
+| `JsonFormatter::REQUIRED_KEYS` | `JsonFormatter::EXPECTED_KEYS` |
+| `JsonFormatter::IGNORED_KEYS` | Removed — keys are no longer partitioned into ignored/required buckets |
+| `FATAL` severity → `"ERROR"` in output | `FATAL` severity → `"FATAL"` in output |
+
 ## Contributing
 
 For information on setting up a development environment, running tests,
