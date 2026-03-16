@@ -369,22 +369,14 @@ describe 'JsonRailsLogger::JsonFormatter' do
     end
   end
 
-  it 'should delegate raw message parsing to injected parser' do
-    parser_calls = []
-    fake_parser = Object.new
-    fake_parser.define_singleton_method(:parse) do |raw_msg|
-      parser_calls << raw_msg
-      { message: 'delegated message' }
-    end
-
-    formatter = JsonRailsLogger::JsonFormatter.new(parser: fake_parser)
+  it 'should preserve plain string messages through parser handling' do
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     log_output = formatter.call('INFO', timestamp, progname, 'raw-input')
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['message']).must_equal('delegated message')
-    _(parser_calls).must_equal(['raw-input'])
+    _(json_output['message']).must_equal('raw-input')
   end
 end

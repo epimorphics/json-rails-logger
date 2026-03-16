@@ -70,24 +70,11 @@ module JsonRailsLogger
     #   # Result: "{"ts":"...","level":"INFO",...,"_filtered":{"password":"secret","api_key":"xyz123"}}"
     #
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html
-    def initialize(
-      filtered_keys: nil,
-      keep_filtered_keys: false,
-      parser: FormattingComponents::MessageParser.new,
-      validator: FormattingComponents::MessageValidator.new,
-      payload_builder_factory: nil,
-      **_opts
-    )
+    def initialize(filtered_keys: nil, keep_filtered_keys: false, **_opts)
       super() # call parent without passing any arguments as it does not accept any
       self.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-      @parser = parser
-      @validator = validator
-      @payload_builder_factory = payload_builder_factory || lambda {
-        FormattingComponents::PayloadBuilder.new(
-          filtered_keys: filtered_keys,
-          keep_filtered_keys: keep_filtered_keys
-        )
-      }
+      @filtered_keys = filtered_keys
+      @keep_filtered_keys = keep_filtered_keys
     end
 
     # Formats a log message into JSON suitable for structured logging and analysis
@@ -143,17 +130,17 @@ module JsonRailsLogger
     # @see Logger#initialize
     # @see RequestIdMiddleware
     # @see https://ruby-doc.org/stdlib/libdoc/logger/rdoc/Logger/Formatter.html#method-i-call
-    def call(severity, timestamp, progname, raw_msg)
+    def call(severity, timestamp, progname, raw_msg) # rubocop:disable Metrics/MethodLength
       sev = process_severity(severity)
       tmstmp = process_timestamp(timestamp)
       prgname = process_progname(progname)
-      msg = @parser.parse(raw_msg)
+      msg = message_parser.parse(raw_msg)
       msg[:progname] = prgname if prgname
       msg[:level] = sev.ljust(5).squish if sev
-      new_msg = @validator.validate(msg).transform_keys(&:to_sym)
+      new_msg = message_validator.validate(msg).transform_keys(&:to_sym)
 
       # Delegate payload assembly and serialisation to PayloadBuilder
-      @payload_builder_factory.call(
+      payload_builder.build(
         timestamp: tmstmp,
         message: new_msg
       )
@@ -170,6 +157,21 @@ module JsonRailsLogger
     }.freeze
 
     private
+
+    def message_parser
+      @message_parser ||= FormattingComponents::MessageParser.new
+    end
+
+    def message_validator
+      @message_validator ||= FormattingComponents::MessageValidator.new
+    end
+
+    def payload_builder
+      @payload_builder ||= FormattingComponents::PayloadBuilder.new(
+        filtered_keys: @filtered_keys,
+        keep_filtered_keys: @keep_filtered_keys
+      )
+    end
 
     # Normalises string input (trim + uppercase) before lookup and returns a
     # stable fallback of 'UNKNOWN' for unmapped values.
