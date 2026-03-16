@@ -142,28 +142,29 @@ preserving them under a debug key for troubleshooting and auditing purposes.
 
 ### Configuration
 
-Configure filtering when initialising the JsonFormatter in your Rails
-environment config:
+Configure filtering when initialising the logger in your Rails environment
+config:
 
 ```ruby
 # config/environments/production.rb
 
-# Option 1: Remove sensitive keys entirely (default)
-config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::JsonFormatter.new(
-  filtered_keys: ['password', 'api_key', 'token'],
-  keep_filtered_keys: false
-))
+# Option 1: No filtering (default)
+config.logger = JsonRailsLogger::Logger.new(STDOUT)
+
+# Option 2: Remove sensitive keys entirely
+config.logger = JsonRailsLogger::Logger.new(
+  STDOUT,
+  filtered_keys: ['password', 'api_key', 'token']
+)
 # Output: {"ts":"...","level":"INFO","message":"User logged in"}
 
-# Option 2: Remove keys but preserve under :_filtered for debugging
-config.logger = JsonRailsLogger::Logger.new(STDOUT, formatter: JsonRailsLogger::JsonFormatter.new(
+# Option 3: Remove keys but preserve under :_filtered for debugging
+config.logger = JsonRailsLogger::Logger.new(
+  STDOUT,
   filtered_keys: ['password', 'api_key'],
   keep_filtered_keys: true
-))
+)
 # Output: {"ts":"...","level":"INFO","message":"User logged in","_filtered":{"password":"secret123","api_key":"xyz789"}}
-
-# Option 3: No filtering (default)
-config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
 
 > [!IMPORTANT]
