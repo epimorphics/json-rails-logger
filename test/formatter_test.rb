@@ -136,6 +136,28 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(keys[2]).must_equal('message')
   end
 
+  it 'should place _filtered last in JSON output when present' do
+    formatter = JsonRailsLogger::JsonFormatter.new(
+      filtered_keys: ['action', 'controller'],
+      keep_filtered_keys: true
+    )
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+
+    message = {
+      method: 'GET',
+      path: '/',
+      status: 200,
+      controller: 'DatasetsController',
+      action: 'index'
+    }
+
+    log_output = formatter.call('INFO', timestamp, progname, message)
+    json_output = JSON.parse(log_output)
+
+    _(json_output.keys.last).must_equal('_filtered')
+    _(json_output['_filtered']).must_equal({ 'action' => 'index', 'controller' => 'DatasetsController' })
+  end
+
   it 'should always include required fields in output' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'

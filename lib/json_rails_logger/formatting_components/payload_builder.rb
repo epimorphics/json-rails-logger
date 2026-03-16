@@ -207,14 +207,20 @@ module JsonRailsLogger
       # improved readability and parsing efficiency.
       #
       # @param payload [Hash] Unordered payload hash
-      # @return [Hash] Reordered payload with ts, level, and message first
+      # @return [Hash] Reordered payload with ts, level, and message first and remaining fields sorted
+      # alphabetically after except :_filtered which is kept at the end
       #
       def reorder_payload(payload)
-        {
+        reordered = {
           ts: payload[:ts],
           level: payload[:level],
           message: payload[:message]
-        }.merge(payload.except(:ts, :level, :message).sort.to_h)
+        }
+
+        rest = payload.except(:ts, :level, :message, :_filtered).sort.to_h
+        filtered = payload.key?(:_filtered) ? { _filtered: payload[:_filtered] } : {}
+
+        reordered.merge(rest).merge(filtered)
       end
 
       # Serialises payload to JSON with trailing newline.
