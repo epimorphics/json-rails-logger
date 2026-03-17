@@ -138,7 +138,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
   it 'should place _filtered last in JSON output when present' do
     formatter = JsonRailsLogger::JsonFormatter.new(
-      filtered_keys: ['action', 'controller'],
+      filtered_keys: %w[action controller],
       keep_filtered_keys: true
     )
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
