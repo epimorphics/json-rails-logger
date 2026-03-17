@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    json_rails_logger (2.3.0)
+    json_rails_logger (3.0.0)
       json (>= 1.8, < 5.0)
       lograge (>= 0.10, < 2.0)
       railties (>= 6.0, < 9.0)
