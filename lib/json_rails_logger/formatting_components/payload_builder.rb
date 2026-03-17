@@ -163,29 +163,86 @@ module JsonRailsLogger
       end
       # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-      # Applies key filtering to the payload based on configuration.
+      # Applies recursive key filtering to the payload based on configuration.
       #
-      # Recursively searches through the payload for keys matching the filter patterns.
-      # When matches are found:
-      # - If keep_filtered_keys is false: removes the matching keys entirely
-      # - If keep_filtered_keys is true: collects them under the :_filtered key for debugging
+      # Traverses all nested hashes and arrays, removing any keys that match the
+      # configured filter patterns. Filtered values are either discarded or
+      # collected under :_filtered depending on keep_filtered_keys.
       #
-      # @param payload [Hash] The payload to filter
-      # @return [Hash] Filtered payload (with keys removed or moved to :_filtered)
+      # When keep_filtered_keys is true, each removed value is recorded using a
+      # dot-separated path reflecting its location in the original structure
+      # (for example, "user.password" or "metadata.0.token").
+      #
+      # @param payload [Hash] The assembled payload to filter
+      # @return [Hash] A filtered copy of the payload, with :_filtered appended
+      #   when keep_filtered_keys is true and matching keys were found
       #
       def apply_filtering(payload)
         filtered_items = {}
-        filtered_payload = payload.dup
-
-        # Find and remove keys matching filter patterns
-        filtered_payload.each_key do |key|
-          filtered_items[key] = filtered_payload.delete(key) if matches_filter?(key)
-        end
-
-        # Add :_filtered key if we found matches and keep_filtered_keys is true
+        filtered_payload = prune_nested_values(payload.dup, filtered_items, [])
         filtered_payload[:_filtered] = filtered_items if @keep_filtered_keys && filtered_items.any?
-
         filtered_payload
+      end
+
+      # Dispatches recursive filtering based on the type of the current value.
+      #
+      # Acts as the recursive entry point for the filtering traversal, delegating
+      # to the appropriate handler for hashes, arrays, and scalar values.
+      #
+      # @param value [Hash, Array, Object] The current node in the payload tree
+      # @param filtered_items [Hash] Accumulator for removed key/value pairs,
+      #   keyed by dot-separated path strings
+      # @param path [Array<String, Symbol, Integer>] The traversal path from root
+      #   to the current node, used to build :_filtered path keys
+      # @return [Hash, Array, Object] A filtered copy of the current node
+      #
+      def prune_nested_values(value, filtered_items, path)
+        case value
+        when Hash
+          prune_nested_hashes(value, filtered_items, path)
+        when Array
+          prune_nested_arrays(value, filtered_items, path)
+        else
+          value
+        end
+      end
+
+      # Rebuilds a hash, omitting keys that match the configured filter patterns.
+      #
+      # Iterates each key/value pair, either discarding the pair or recursing into
+      # the value when not filtered. Matching keys are recorded in filtered_items
+      # when keep_filtered_keys is enabled.
+      #
+      # @param value [Hash] The hash to filter
+      # @param filtered_items [Hash] Accumulator for removed key/value pairs
+      # @param path [Array<String, Symbol, Integer>] Current traversal path
+      # @return [Hash] A new hash with matching keys removed
+      #
+      def prune_nested_hashes(value, filtered_items, path)
+        value.each_with_object({}) do |(key, child), acc|
+          key_path = path + [key]
+          if matches_filter?(key)
+            filtered_items[key_path.join('.')] = child if @keep_filtered_keys
+          else
+            acc[key] = prune_nested_values(child, filtered_items, key_path)
+          end
+        end
+      end
+
+      # Maps over an array, recursively filtering each element.
+      #
+      # Array indices are appended to the traversal path so that :_filtered path
+      # keys remain unambiguous (for example, "metadata.0.token").
+      #
+      # @param value [Array] The array to traverse
+      # @param filtered_items [Hash] Accumulator for removed key/value pairs
+      # @param path [Array<String, Symbol, Integer>] Current traversal path
+      # @return [Array] A new array with each element recursively filtered
+      #
+      def prune_nested_arrays(value, filtered_items, path)
+        value.each_with_index.map do |child, index|
+          prune_nested_values(child, filtered_items, path + [index])
+        end
       end
 
       # Checks if a key matches any of the filter patterns.
