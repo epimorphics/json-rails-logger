@@ -15,6 +15,11 @@ require 'minitest/autorun'
 require 'logger'
 require 'json'
 require 'rails'
+
+# Suppress lograge gem's method redefinition warnings during load
+old_verbose = $VERBOSE
+$VERBOSE = nil
 require 'lograge' unless defined?(Lograge)
+$VERBOSE = old_verbose
 
 require 'json_rails_logger'

@@ -35,8 +35,8 @@ sources.
 
 This logger makes use of [lograge](https://github.com/roidrage/lograge) to
 "attempt to tame Rails' default policy". However, we augment the JSON format
-used by lograge to fit our local requirements, and ensure the HTTP request ID
-is logged where available.
+used by lograge to fit our local requirements, and ensure the HTTP request ID is
+logged where available.
 
 ### Gem API Documentation
 
@@ -62,7 +62,14 @@ then opens `doc/index.html` in your browser. The generated docs are particularly
 useful when integrating the gem into complex Rails applications or when
 troubleshooting unexpected logging behaviour.
 
-## Using with a Rails application
+## Installation
+
+This gem is published to the Epimorphics [GitHub Package
+Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry).
+You'll need to authenticate Bundler with a personal access token (PAT) to fetch
+the gem. See [GitHub Package Registry
+Authentication](CONTRIBUTING.md#github-package-registry-authentication) in
+CONTRIBUTING.md for setup instructions.
 
 In your Rails app, add this to your `Gemfile`:
 
@@ -76,14 +83,6 @@ And this to your environment config (e.g. `config/environments/production.rb`):
 
 ```ruby
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
-```
-
-To include fields that are ignored by default (such as `action`, `controller`,
-or `user_agent`), set `include_ignored_keys: true` when configuring the logger
-(e.g. in `config/environments/development.rb`):
-
-```ruby
-config.logger = JsonRailsLogger::Logger.new(STDOUT, include_ignored_keys: true)
 ```
 
 ## How It Works
@@ -131,96 +130,83 @@ several reasons:
 - **No context passing**: The formatter and other components can read the
   request ID without it being passed as a parameter
 
-## GitHub package registry
+## Filtering Specific Keys from Logs
 
-This gem is published via the Epimorphics instance of the
-[GitHub Package Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-rubygems-registry).
-This allows us to publish and use Rubygems that we create, in our own apps,
-without having to pubish via the public `rubygems.org`, or wire-in direct
-references to GitHub repos in our `Gemfile`s.
+The json-rails-logger gem provides built-in support for filtering specific keys
+from log output. This is particularly useful for suppressing verbose or
+repetitive fields that clutter logs without adding diagnostic value, removing
+confidential information such as passwords, API keys, and access tokens that
+might be stored or transmitted outside secure boundaries, and for selective
+debugging — by keeping filtered keys hidden in production whilst optionally
+preserving them under a debug key for troubleshooting and auditing purposes.
 
-Access to the GihHub package registry is authorised via a _personal access
-token_ (PAT), which is usually stored in `.github-token` in the project's
-root directory. Bundler will need to configured to use the PAT when fetching
-gems from the Epimorphics package registry. By convention, there should be
-a convenient `Makefile` target to help developers to both store the PAT and
-authorise Bundler:
+### Configuration
 
-```sh
-make auth
+Configure filtering when initialising the logger in your Rails environment
+config:
+
+```ruby
+# config/environments/production.rb
+
+# Option 1: No filtering (default)
+config.logger = JsonRailsLogger::Logger.new(STDOUT)
+
+# Option 2: Remove sensitive keys entirely
+config.logger = JsonRailsLogger::Logger.new(
+  STDOUT,
+  filtered_keys: ['password', 'api_key', 'token']
+)
+# Output: {"ts":"...","level":"INFO","message":"User logged in"}
+
+# Option 3: Remove keys but preserve under :_filtered for debugging
+config.logger = JsonRailsLogger::Logger.new(
+  STDOUT,
+  filtered_keys: ['password', 'api_key'],
+  keep_filtered_keys: true
+)
+# Output: {"ts":"...","level":"INFO","message":"User logged in","_filtered":{"password":"secret123","api_key":"xyz789"}}
 ```
 
-When run for the first time, this will ask for your PAT. See
-[notes on the internal wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
-about creating a PAT.
+> [!IMPORTANT]
+> **Key matching** is exact and case-sensitive. Both string and
+> symbol keys are supported (`['password']` and `[:password]` are equivalent).
+> The `_filtered` key only appears when `keep_filtered_keys: true` **and** at
+> least one key was filtered.
 
-See also notes on making a release of the gem, below.
+## Severity Levels
 
-## Developer notes
+Log severity is normalised according to the following mapping:
 
-After cloning the repo, to install all dependecies, first execute
+| Input | Output |
+|---|---|
+| `DEBUG`, `TRACE`, `0` | `DEBUG` |
+| `INFO`, `1` | `INFO` |
+| `WARN`, `2` | `WARN` |
+| `ERROR`, `3` | `ERROR` |
+| `FATAL`, `CRITICAL`, `4` | `FATAL` |
+| anything else | `UNKNOWN` |
 
-   make assets
+> [!NOTE]
+> Prior to v3.0.0, `FATAL` was mapped to `ERROR`. From v3.0.0 onwards `FATAL`
+> is preserved. If your log pipeline or alerting rules differentiate on
+> severity, you may need to update those rules when upgrading.
 
-### Linting the code
+## Upgrading from v2.x
 
-To check forrmatting and use, execute
+| v2.x | v3.x |
+|---|---|
+| `JsonFormatter.new(include_ignored_keys: true)` | No direct equivalent — use `filtered_keys:` to suppress specific noisy fields |
+| `JsonFormatter::REQUIRED_KEYS` | `JsonFormatter::EXPECTED_KEYS` |
+| `JsonFormatter::IGNORED_KEYS` | Removed — keys are no longer partitioned into ignored/required buckets |
+| `FATAL` severity → `"ERROR"` in output | `FATAL` severity → `"FATAL"` in output |
 
-   make lint
+## Contributing
 
-Rubocop should produce no warnings.
+For information on setting up a development environment, running tests,
+generating documentation, and publishing releases, see
+[CONTRIBUTING.md](CONTRIBUTING.md)
 
-### Running the tests
-
-Tests are located in the `./test/` folder.
-
-To run the tests, use
-
-   make test
-
-#### One step check
-
-You can also runs both linting and tests using
-
-   make check
-
-### `Makefile`
-
-There is a `Makefile` with some shared dev tasks.
-
-To check that the gem will build correctly: `make build`
-
-To create the GitHub and Bundler authorisations: `make auth`
-
-To publish the gem to the GitHub package registry: `make publish`
-
-### API Documentation
-
-The gem includes comprehensive YARD documentation on all public methods:
-
-- **In your IDE**: Hover over `Logger.new` or `JsonFormatter.call` to see
-  parameter types and usage examples
-- **As HTML docs**: Run `make doc` to generate human-readable API reference in
-  `doc/index.html`
-
-This documentation includes parameter types, return values, example usage, and
-cross-references to Rails and Ruby stdlib documentation.
-
-### Publishing a new version of the gem
-
-To publish a new version of the gem after a bugfix or feature addition:
-
-1. Ensure that the version in `lib/json_rails_logger/version.rb` has
-   been updated to reflect the correct semver representing the change
-2. Update the `CHANGELOG.md` to document the new change
-3. `git tag` the new state with a tag that matches the new version
-4. Push the new tagged release to GitHub
-5. Run `make publish` to push the new gem to the GitHub package registry.
-
-Pushing a tagged version will automatically trigger the publish gem
-workflow, which should result in the gem appearing on the
-[list of releases](https://github.com/epimorphics/json-rails-logger/releases)
-
----
-
-[^1]: <https://guides.rubyonrails.org/plugins.html#using-the-railtie> "Rails Guides: Using the Railtie – A Railtie is a mechanism to hook into Rails' initialization process, allowing gems to run setup code automatically when Rails boots"
+[^1]: <https://guides.rubyonrails.org/plugins.html#using-the-railtie> "Rails
+    Guides: Using the Railtie – A Railtie is a mechanism to hook into Rails'
+    initialization process, allowing gems to run setup code automatically when
+    Rails boots"

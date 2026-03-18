@@ -4,22 +4,21 @@ require './test/test_helper'
 
 describe 'JsonRailsLogger::JsonFormatter' do
   let(:fixture) do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter
   end
 
   let(:timestamp) { Time.parse('2020-12-15 20:15:21.286') }
   let(:progname) { 'progname' }
 
-  it 'should replace FATAL with ERROR for severity' do
+  it 'should preserve FATAL severity' do
     message = '[Webpacker] Compilation error!'
 
     log_output = fixture.call('FATAL', timestamp, progname, message)
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    _(json_output['level']).must_equal('ERROR')
+    _(json_output['level']).must_equal('FATAL')
   end
 
   it 'should parse status messages to json' do
@@ -89,7 +88,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['request_time']).must_equal(1_234_568)
   end
 
-  it 'should exclude ignored fields by default' do
+  it 'should include user_agent and accept from user-agent headers' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
@@ -97,24 +96,12 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('INFO', timestamp, progname, message)
     json_output = JSON.parse(log_output)
 
-    _(json_output['user_agent']).must_be_nil
-    _(json_output['accept']).must_be_nil
-  end
-
-  it 'should include ignored message fields when configured' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-
-    message = "User-Agent: \"Test-Client\"\nAccept: \"application/json\""
-    log_output = formatter.call('INFO', timestamp, progname, message)
-    json_output = JSON.parse(log_output)
-
-    _(json_output['user_agent']).wont_be_nil
-    _(json_output['accept']).wont_be_nil
+    _(json_output['user_agent']).must_equal('Test-Agent')
+    _(json_output['accept']).must_equal('application/json')
   end
 
   it 'should handle nil severity without truncation errors' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     log_output = formatter.call(nil, timestamp, progname, 'Status 200')
@@ -123,6 +110,18 @@ describe 'JsonRailsLogger::JsonFormatter' do
     json_output = JSON.parse(log_output)
     _(json_output).must_include('ts')
     _(json_output).must_include('status')
+  end
+
+  it 'should handle nil raw message via parser delegation' do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+
+    log_output = formatter.call('INFO', timestamp, progname, nil)
+    json_output = JSON.parse(log_output)
+
+    _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
+    _(json_output['level']).must_equal('INFO')
+    _(json_output['message']).must_be_nil
   end
 
   it 'should place ts, level, and message first in JSON output' do
@@ -137,27 +136,44 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(keys[2]).must_equal('message')
   end
 
-  it 'should maintain consistent required fields regardless of ignored inclusion' do
-    formatter_with_ignored = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-    formatter_without_ignored = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
-
-    [formatter_with_ignored, formatter_without_ignored].each do |formatter|
-      formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-      log_output = formatter.call('INFO', timestamp, progname, 'Status 200')
-      json_output = JSON.parse(log_output)
-
-      _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
-      _(json_output['level']).must_equal('INFO')
-      _(json_output['status']).must_equal(200)
-    end
-  end
-
-  # Integration tests with real request/response scenarios
-  it 'should format a complete request event' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+  it 'should place _filtered last in JSON output when present' do
+    formatter = JsonRailsLogger::JsonFormatter.new(
+      filtered_keys: %w[action controller],
+      keep_filtered_keys: true
+    )
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Simulate a typical data query request
+    message = {
+      method: 'GET',
+      path: '/',
+      status: 200,
+      controller: 'DatasetsController',
+      action: 'index'
+    }
+
+    log_output = formatter.call('INFO', timestamp, progname, message)
+    json_output = JSON.parse(log_output)
+
+    _(json_output.keys.last).must_equal('_filtered')
+    _(json_output['_filtered']).must_equal({ 'action' => 'index', 'controller' => 'DatasetsController' })
+  end
+
+  it 'should always include required fields in output' do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+
+    log_output = formatter.call('INFO', timestamp, progname, 'Status 200')
+    json_output = JSON.parse(log_output)
+
+    _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
+    _(json_output['level']).must_equal('INFO')
+    _(json_output['status']).must_equal(200)
+  end
+
+  it 'should format a complete request event' do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
+
     request_event = {
       method: 'GET',
       path: '/api/datasets/ukhpi/query',
@@ -175,7 +191,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('INFO', timestamp, progname, request_event)
     json_output = JSON.parse(log_output)
 
-    # Verify required fields are present
     _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
     _(json_output['level']).must_equal('INFO')
     _(json_output['method']).must_equal('GET')
@@ -183,20 +198,16 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['status']).must_equal(200)
     _(json_output['request_time']).must_equal('0.146')
 
-    # Verify ignored fields are excluded by default
-    _(json_output['controller']).must_be_nil
-    _(json_output['action']).must_be_nil
-    _(json_output['user_agent']).must_be_nil
-
-    # Verify params are excluded (not in REQUIRED_KEYS)
-    _(json_output['params']).must_be_nil
+    _(json_output['controller']).must_equal('Api::DatasetsController')
+    _(json_output['action']).must_equal('query')
+    _(json_output['user_agent']).must_equal('Mozilla/5.0')
+    _(json_output['params']).must_equal({ 'dataset' => 'ukhpi', 'limit' => '100' })
   end
 
   it 'should handle request events with exceptions' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Simulate a data import validation failure
     request_event = {
       method: 'POST',
       path: '/api/imports/validate',
@@ -211,21 +222,17 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('WARN', timestamp, progname, request_event)
     json_output = JSON.parse(log_output)
 
-    # Verify exception info is included
     _(json_output['exception']).must_be_kind_of(Array)
     _(json_output['exception'][0]).must_equal('DataValidationError')
     _(json_output['exception'][1]).must_include('Invalid CSV format')
-
-    # Verify status-based level normalization (422 → WARN)
     _(json_output['level']).must_equal('WARN')
     _(json_output['status']).must_equal(422)
   end
 
-  it 'should include controller and action in request output when include_ignored_keys is true' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
+  it 'should compose message with controller and action details' do
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Simulate a dataset transformation request
     request_event = {
       method: 'PUT',
       path: '/api/datasets/ppd/transform',
@@ -238,25 +245,20 @@ describe 'JsonRailsLogger::JsonFormatter' do
     log_output = formatter.call('INFO', timestamp, progname, request_event)
     json_output = JSON.parse(log_output)
 
-    # Verify ignored fields ARE included
+    _(json_output['message']).must_match(/Transformations.*apply.*request complete/)
     _(json_output['controller']).must_equal('Api::TransformationsController')
     _(json_output['action']).must_equal('apply')
-
-    # Verify the completion message formatting
-    _(json_output['message']).must_match(/Transformations.*apply.*request complete/)
   end
 
   it 'should include request_id from thread storage with request event' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
     request_id = 'data-export-abc123-def456'
 
     begin
-      # Simulate middleware setting request ID
       Thread.current[JsonRailsLogger::REQUEST_ID] = request_id
 
-      # Simulate a data export request
       request_event = {
         method: 'POST',
         path: '/api/exports/csv',
@@ -269,7 +271,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
       log_output = formatter.call('INFO', timestamp, progname, request_event)
       json_output = JSON.parse(log_output)
 
-      # Verify request_id from thread storage is included
       _(json_output['request_id']).must_equal(request_id)
       _(json_output['method']).must_equal('POST')
       _(json_output['path']).must_equal('/api/exports/csv')
@@ -280,50 +281,39 @@ describe 'JsonRailsLogger::JsonFormatter' do
     end
   end
 
-  # Error handling tests
   it 'should handle malformed JSON gracefully' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Invalid JSON (missing closing brace)
     malformed_json = '{"method": "GET", "path": "/api/data"'
 
     log_output = formatter.call('INFO', timestamp, progname, malformed_json)
     _(log_output).must_be_kind_of(String)
 
     json_output = JSON.parse(log_output)
-    # Should treat malformed JSON as a regular string and process it
-    # Since it doesn't match status/request/user-agent patterns, it becomes a message
     _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
     _(json_output['level']).must_equal('INFO')
-    # The formatter should not crash on malformed JSON
   end
 
   it 'should handle invalid severity values gracefully' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Invalid severity: empty string
     log_output = formatter.call('', timestamp, progname, 'Test message')
     _(log_output).must_be_kind_of(String)
     json_output = JSON.parse(log_output)
-    # Empty severity gets processed as empty string (not nil)
-    _(json_output['level']).must_equal('')
+    _(json_output['level']).must_equal('UNKNOWN')
 
-    # Unknown severity: completely unknown
     log_output = formatter.call('SUPERSEVERE', timestamp, progname, 'Another test')
     _(log_output).must_be_kind_of(String)
     json_output = JSON.parse(log_output)
-    # Unknown severity is processed without crashing
-    _(json_output).must_include('ts')
-    _(json_output).must_include('level')
+    _(json_output['level']).must_equal('UNKNOWN')
   end
 
   it 'should handle edge-case request_time values' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Extremely large duration (1 hour in milliseconds)
     large_request_event = {
       method: 'POST',
       path: '/api/imports/process-bulk',
@@ -335,7 +325,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     json_output = JSON.parse(log_output)
     _(json_output['request_time']).must_equal(3_600_000)
 
-    # Very small duration (1 microsecond)
     tiny_request_event = {
       method: 'GET',
       path: '/api/health',
@@ -347,7 +336,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     json_output = JSON.parse(log_output)
     _(json_output['request_time']).must_equal(0)
 
-    # Zero duration
     zero_request_event = {
       method: 'GET',
       path: '/api/cache-hit',
@@ -359,7 +347,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     json_output = JSON.parse(log_output)
     _(json_output['request_time']).must_be_nil
 
-    # nil request_time (should not appear in output due to compact filter)
     nil_request_event = {
       method: 'DELETE',
       path: '/api/cleanup',
@@ -371,7 +358,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     json_output = JSON.parse(log_output)
     _(json_output['request_time']).must_be_nil
 
-    # false request_time (stays as false, not filtered as it's a falsy value)
     false_request_event = {
       method: 'PATCH',
       path: '/api/updates',
@@ -381,143 +367,38 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     log_output = formatter.call('INFO', timestamp, progname, false_request_event)
     json_output = JSON.parse(log_output)
-    # false is kept as-is by compact filter (only removes nil, not false)
     _(json_output['request_time']).must_equal(false)
   end
 
   it 'should handle circular references without crashing' do
-    formatter = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: false)
+    formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    # Create an object with circular reference
     circular_data = {
       method: 'GET',
       path: '/api/data',
       status: 200
     }
-    # Create the circular reference
     circular_data[:self_reference] = circular_data
 
-    # The formatter should either handle this gracefully or raise a clear error
     begin
       log_output = formatter.call('INFO', timestamp, progname, circular_data)
       _(log_output).must_be_kind_of(String)
-      # If it succeeds, verify basic structure is intact
       json_output = JSON.parse(log_output)
       _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
     rescue JSON::GeneratorError => e
-      # If it raises GeneratorError (expected for circular refs), that's acceptable
       _(e.message).must_include('circular')
     end
   end
 
-  # Unit tests for private method: process_ignored_keys
-  describe 'JsonFormatter#process_ignored_keys (unit)' do
-    let(:formatter) do
-      f = JsonRailsLogger::JsonFormatter.new(include_ignored_keys: true)
-      f.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-      f
-    end
+  it 'should preserve plain string messages through parser handling' do
+    formatter = JsonRailsLogger::JsonFormatter.new
+    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
-    it 'should format message and insert request_uri before comma when all three keys present' do
-      msg = {
-        message: 'Initial request, additional info',
-        ignored: {
-          'controller' => 'Api::TransformationsController',
-          'action' => 'apply',
-          'request_uri' => '/api/datasets/transform',
-          'user_agent' => 'TestClient'
-        }
-      }
+    log_output = formatter.call('INFO', timestamp, progname, 'raw-input')
+    _(log_output).must_be_kind_of(String)
 
-      result = formatter.send(:process_ignored_keys, msg)
-
-      _(result).must_match(/Transformations apply request complete/)
-      _(result).must_include('to /api/datasets/transform')
-      # Verify URI was appended to the message
-      _(result).must_match(%r{Transformations apply request complete to /api/datasets/transform})
-    end
-
-    it 'should extract controller name from namespaced controller' do
-      msg = {
-        message: 'Request event, context info',
-        ignored: {
-          'controller' => 'Admin::Dashboard::AnalyticsController',
-          'action' => 'show',
-          'user_agent' => 'Chrome'
-        }
-      }
-
-      result = formatter.send(:process_ignored_keys, msg)
-
-      # Should extract last segment after Controller suffix
-      _(result).must_match(/Analytics show request complete/)
-    end
-
-    it 'should not format message if controller is missing' do
-      msg = {
-        message: 'Original message text',
-        ignored: {
-          'action' => 'index',
-          'user_agent' => 'Firefox'
-        }
-      }
-
-      result = formatter.send(:process_ignored_keys, msg)
-
-      # Without controller, action alone does not trigger formatting
-      _(result).must_equal('Original message text')
-    end
-
-    it 'should return original message when ignored hash has no IGNORED_KEYS members' do
-      msg = {
-        message: 'Base message content',
-        ignored: {
-          'custom_field' => 'value1',
-          'another_field' => 'value2',
-          'service_name' => 'my_service'
-        }
-      }
-
-      result = formatter.send(:process_ignored_keys, msg)
-
-      # No IGNORED_KEYS present, so IGNORED_KEYS.any? check fails
-      _(result).must_equal('Base message content')
-    end
-
-    it 'should handle symbol keys as alternative to string keys in ignored hash' do
-      msg = {
-        message: 'Request context',
-        ignored: {
-          controller: 'Api::UsersController',
-          action: 'update',
-          request_uri: '/api/users/42'
-        }
-      }
-
-      result = formatter.send(:process_ignored_keys, msg)
-
-      # Symbol keys should work via the || fallback
-      _(result).must_match(/Users update request complete/)
-      _(result).must_include('to /api/users/42')
-    end
-
-    it 'should append request_uri to formatted message when present' do
-      msg = {
-        message: 'Simple message',
-        ignored: {
-          'controller' => 'Api::TestController',
-          'action' => 'test',
-          'request_uri' => '/api/test'
-        }
-      }
-
-      result = formatter.send(:process_ignored_keys, msg)
-
-      # Should format the message with controller and action
-      _(result).must_match(/Test test request complete/)
-      # Should append the request_uri to the message
-      _(result).must_include(' to /api/test')
-    end
+    json_output = JSON.parse(log_output)
+    _(json_output['message']).must_equal('raw-input')
   end
 end
