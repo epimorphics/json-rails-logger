@@ -8,29 +8,28 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-## [3.0.0] - 2026-03-16
+## [3.0.0] - 2026-03
 
 ### Added
 
 - Introduced dedicated formatting components: `MessageParser`,
   `MessageValidator`, `PayloadBuilder`, `RequestContext`, and `MessageComposer`.
-- Implemented log filtering via `filtered_keys`
+- Implemented `filtered_keys` configuration to suppress specified keys from log
+  output, and `keep_filtered_keys` to optionally retain suppressed values under
+  `:_filtered` for diagnostic purposes.
   [#67](https://github.com/epimorphics/json-rails-logger/issues/67)
-- Enabled optional retention of filtered values via `keep_filtered_keys`,
-  emitted under `:_filtered`.
 - Expanded formatter tests to cover severity normalisation, nil/malformed
   inputs, payload key ordering, and filtered key output placement.
 - Included README upgrade guidance for consumers moving from v2.x to v3.x.
 
 ### Changed
 
-- Refactored `JsonFormatter` to orchestrate internal formatting components while
-  keeping consumer configuration focused on `filtered_keys` and
-  `keep_filtered_keys`.
+- Refactored `JsonFormatter` to delegate formatting concerns to dedicated
+  internal components.
 - Updated severity normalisation so `FATAL` is preserved as `FATAL` and unknown
   values map to `UNKNOWN`.
-- Reordered payload output so `ts`, `level`, and `message` are emitted first.
-- Reordered payload output so `:_filtered` is emitted last when present.
+- Reordered payload output so `ts`, `level`, and `message` are emitted first,
+  and `:_filtered` is emitted last when present.
 - Clarified logger and README documentation for formatter override behaviour and
   filtering configuration.
 
@@ -38,16 +37,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Removed `JsonFormatter::IGNORED_KEYS`.
 - Retired previous ignored-key behaviour based on `include_ignored_keys`.
-- Dropped public collaborator injection from `JsonFormatter` initialisation
-  (`parser`, `validator`, `payload_builder_factory`) as supported API surface.
 
 ### Fixed
 
 - Corrected request-time normalisation when duration or request-time values are
   nil or floats.
 - Improved consistency of string/raw message parsing and sanitisation.
-- Improved filtered-output readability by placing `:_filtered` at the end of
-  emitted payloads.
 
 ## [2.3.0] - 2026-02
 
