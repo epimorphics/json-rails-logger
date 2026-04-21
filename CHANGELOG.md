@@ -3,10 +3,38 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic
-Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## [3.0.1] - 2026-04
+
+### Fixed
+
+- `request_time` is now emitted as a floating-point number (e.g. `1.094`) rather
+  than a string (e.g. `"1.094"`), correcting a type inconsistency with the
+  [Epimorphics Logging Standard](https://github.com/epimorphics/internal/wiki/Logging-Standard#additional-fields)
+  which requires consistent numeric types for fields consumed by the logging
+  stack.
+- `message` is now omitted from log output entirely when no message value is
+  present (e.g. structured-only Faraday client log entries), rather than being
+  emitted as `null`. The logging standard requires fields to appear only when
+  pertinent.
+
+### Changed
+
+- Makefile rewritten to reflect gem development workflow. Application-specific
+  targets have been removed, missing targets (`gem`, `tags`, `docs`) added, and
+  broken targets (`VERSION` path, `test`, `lint`, `publish`) corrected. The
+  `gem` and `tags` targets are required by the CI publication workflow. All
+  targets are alphabetically ordered.
+- CONTRIBUTING.md updated to correct the setup command, reflect current
+  Makefile targets, fix a stale authentication reference, and clarify the
+  publication process.
+- README.md restructured for faster reference during incidents, with output format
+  and severity levels moved to the top. Real log examples, a common fields
+  table, Puma configuration guidance, and version requirements added. The
+  upgrading section correctly distinguishes v2.x from v2.3.0 changes.
 
 ## [3.0.0] - 2026-03
 
