@@ -112,7 +112,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output).must_include('status')
   end
 
-  it 'should handle nil raw message via parser delegation' do
+  it 'should omit message key entirely when raw message is nil' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
@@ -121,11 +121,11 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
     _(json_output['level']).must_equal('INFO')
-    _(json_output['message']).must_be_nil
+    _(json_output.key?('message')).must_equal(false)
   end
 
   it 'should place ts, level, and message first in JSON output' do
-    message = 'Status 200'
+    message = 'Something happened'
 
     log_output = fixture.call('INFO', timestamp, progname, message)
     json_output = JSON.parse(log_output)
