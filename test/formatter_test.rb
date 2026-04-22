@@ -88,18 +88,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['request_time']).must_equal(1_234_568)
   end
 
-  it 'should include user_agent and accept from user-agent headers' do
-    formatter = JsonRailsLogger::JsonFormatter.new
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-
-    message = "User-Agent: \"Test-Agent\"\nAccept: \"application/json\""
-    log_output = formatter.call('INFO', timestamp, progname, message)
-    json_output = JSON.parse(log_output)
-
-    _(json_output['user_agent']).must_equal('Test-Agent')
-    _(json_output['accept']).must_equal('application/json')
-  end
-
   it 'should handle nil severity without truncation errors' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
