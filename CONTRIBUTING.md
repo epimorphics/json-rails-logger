@@ -9,10 +9,10 @@ After cloning the repository:
 ### Install Dependencies
 
 ```sh
-make assets
+make bundles
 ```
 
-This installs all required gems and dependencies.
+This installs all required gems via Bundler.
 
 ### GitHub Package Registry Authentication
 
@@ -39,28 +39,33 @@ access token.
 
 #### For Developers (Working on the Gem)
 
-By convention, there is a convenient `Makefile` target to help developers store
-the PAT and authorise Bundler:
+By convention, there is a convenient `Makefile` target to help developers
+authenticate with the GitHub Package Registry. Running `make auth` will prompt
+for your PAT and write it to `~/.gem/credentials`:[^‡]
 
 ```sh
 make auth
 ```
 
-When run for the first time, this will prompt for your PAT.[^‡]
+The same mechanism is used by the CI publication workflow, where the PAT is
+supplied automatically via `secrets.GITHUB_TOKEN`.
 
 ## Development Workflow
 
 ### `Makefile` Commands
 
-The project includes a `Makefile` with other common development tasks:
+The project includes a `Makefile` with common development tasks:
 
-- `make build` — Check that the gem builds correctly
 - `make auth` — Create GitHub and Bundler authorisations
-- `make test` — Run the test suite
-- `make lint` — Run Rubocop linting
+- `make build` — Build the gem locally
 - `make check` — Run both linting and tests
-- `make doc` — Generate YARD documentation
-- `make publish` — Publish the gem to GitHub package registry
+- `make docs` — Generate YARD documentation and open in browser
+- `make gem` — Build the gem package for release
+- `make lint` — Run Rubocop linting
+- `make publish` — Build and publish the gem to the GitHub Package Registry
+- `make tags` — Display version information for the CI pipeline
+- `make test` — Run the test suite
+- `make updates` — Check for outdated Ruby gems
 
 ## API Documentation
 
@@ -86,13 +91,12 @@ To publish a new version of the gem after a bugfix or feature addition:
 2. Update the `CHANGELOG.md` to document the new change
 3. `git tag` the new state with a tag that matches the new version
 4. Push the new tagged release to GitHub
-5. Run `make publish` to push the new gem to the GitHub package registry
 
 Pushing a tagged version will automatically trigger the publish gem workflow,
 which should result in the gem appearing on the [list of
-releases](https://github.com/epimorphics/json-rails-logger/releases).
+releases](https://github.com/epimorphics/json-rails-logger/releases). If the
+workflow does not trigger or needs to be run manually, `make publish` will build
+and push the gem directly to the GitHub Package Registry.
 
-[^‡]: See [notes on the
-Epimorphics internal
-wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
+[^‡]: See [notes on the Epimorphics internal wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
 about creating a PAT.

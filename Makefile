@@ -1,8 +1,10 @@
-.PHONY: all assets auth build bundles check checks clean coverage doc gem help lint publish realclean rubocop tags test update vars
+.PHONY: all auth build bundles check checks clean coverage docs forceclean gem help lint publish realclean rubocop tag tags test updates vars version
 
 NAME?=json_rails_logger
 OWNER?=epimorphics
+COMMIT=$(shell git rev-parse --short HEAD)
 VERSION?=$(shell /usr/bin/env ruby -e 'require "./lib/${NAME}/version" ; puts JsonRailsLogger::VERSION')
+TAG?=${VERSION}-${COMMIT}
 PAT?=$(shell read -p 'Github access token:' TOKEN; echo $$TOKEN)
 BUNDLE?=bundle
 
@@ -21,91 +23,90 @@ ${AUTH}:
 ${GEM}: ${SPEC} ./lib/${NAME}/version.rb
 	gem build ${SPEC}
 
-all: publish ## Default target: publish the gem
+all: check ## Default target: run all checks
 
-assets: auth bundles ## Build assets for gem package
-	@echo assets completed.
+auth: ${AUTH} ## Set up authentication for GitHub and Bundler
+	@echo "Authentication set up for GitHub and Bundler."
 
-auth: ${AUTH} ## Set up authentication for package distribution
-	@echo "Authentication set up for package distribution."
+build: ## Build the gem
+	@echo "Building ${GEM} ..."
+	@${BUNDLE} exec gem build ${SPEC}
+	@echo "Done."
 
-build: clean gem ## Build the gem package
-
-bundles: ## Install gem dependencies via Bundler
-	@echo "Installing gem dependencies via Bundler..."
+bundles: ## Install Ruby gems via Bundler
+	@echo "Installing Ruby gems via Bundler..."
 	@${BUNDLE} install
 
-check: checks ## Alias for `checks` target
+check: checks ## Alias for checks target
 
 checks: lint test ## Run all checks: linting and tests
 	@echo "All checks passed."
 
-clean: ## Clean up generated gem package
-	@echo "Removing ${GEM} ..."
-	@rm -rf ${GEM}
+clean: ## Remove generated files
+	@echo "Cleaning up..."
+	@rm -rf coverage doc *.gem
 
 coverage: ## Display test coverage report
 	@open coverage/index.html
 	@echo "Displaying test coverage report in browser..."
 
-doc: ## Generate YARD API documentation
-	@yard doc
+docs: ## Generate YARD documentation and open in browser
+	@echo "Generating YARD documentation..."
+	@${BUNDLE} exec yard doc
 	@open doc/index.html
-	@echo "Displaying API documentation generated in doc/index.html"
-	@echo "Available in IDE autocompletion (hover over methods in VS Code/RubyMine)"
 
-gem: ${GEM} ## Build the gem package
+forceclean: realclean ## Remove all bundled files and reset Bundler
+	@${BUNDLE} clean --force || :
+
+gem: ${GEM} ## Build the gem package for release
 	@echo ${GEM}
 
 help: ## Display this message
 	@echo "Available make targets:"
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-20s %s\n", $$1, $$2}'
 	@echo ""
-ifdef AWS_PROFILE
-	@echo "Environment variables (optional: all variables have defaults):"
 	@make vars
-else
-	@echo "Warning: AWS_PROFILE environment variable is not set. AWS CLI commands may fail."
-	@echo "Re-run with AWS_PROFILE set to see all variables"
-endif
 
 lint: rubocop ## Run linting checks
-	@echo "All linting complete."
+	@echo "Linting complete."
 
-publish: ${AUTH} ${GEM} ## Publish the gem package to Epimorphics Package Registry
-	@echo Publishing package ${NAME}:${VERSION} to ${OWNER} ...
-	@gem push --key github --host ${GPR} ${GEM}
-	@echo Done.
+publish: ${AUTH} ${GEM} ## Publish the gem to the GitHub Package Registry
+	@echo "Publishing ${GEM} to GitHub Package Registry..."
+	@gem push --key github \
+		--host ${GPR} ${GEM}
+	@echo "Done."
 
-realclean: clean ## Remove authentication files
-	@rm -rf ${AUTH}
+realclean: clean ## Remove all generated files and authentication
+	@echo "Removing authentication..."
+	@rm -f ${AUTH}
 
 rubocop: ## Run RuboCop linting
-	@echo "Running RuboCop linting for ${GEM} ..."
-# Auto-correct offenses safely where possible with the `-a` flag
+	@echo "Running RuboCop linting..."
 	@${BUNDLE} exec rubocop -a
 
-tags: ## Display version information
+tag: ## Display the current gem tag
+	@echo ${TAG}
+
+tags: ## Display version information for CI pipeline
 	@echo version=${VERSION}
 
-test: ## Run tests
+test: ## Run the test suite
 	@echo "Running tests..."
 	@${BUNDLE} exec rake test
 
-update: ## Review and update dependencies interactively
-	@echo "Checking for outdated dependencies..."
-	@if [ -f package.json ]; then \
-		echo "Running yarn upgrade-interactive..."; \
-		yarn upgrade-interactive; \
-	fi
+updates: ## Check for outdated Ruby gems with Bundler
 	@echo "Running bundle outdated to check Ruby gems..."
-# Let bundler handle output; treat this as informational even if deps are outdated
 	@${BUNDLE} outdated --only-explicit || true
 
-vars: ## Display environment variables
-	@echo "GEM"	= ${GEM}
-	@echo "GPR"	= ${GPR}
-	@echo "NAME = ${NAME}"
-	@echo "OWNER = ${OWNER}"
-	@echo "SPEC = ${SPEC}"
-	@echo "VERSION = ${VERSION}"
+vars: ## Display current variable values
+	@echo "COMMIT          = ${COMMIT}"
+	@echo "GEM             = ${GEM}"
+	@echo "GPR             = ${GPR}"
+	@echo "NAME            = ${NAME}"
+	@echo "OWNER           = ${OWNER}"
+	@echo "SPEC            = ${SPEC}"
+	@echo "TAG             = ${TAG}"
+	@echo "VERSION         = ${VERSION}"
+
+version: ## Display the gem version
+	@echo ${VERSION}

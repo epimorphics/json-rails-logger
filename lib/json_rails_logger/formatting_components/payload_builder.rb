@@ -142,7 +142,7 @@ module JsonRailsLogger
       # @param message [Hash] Message hash to enrich
       # @return [Hash] Enriched message with updated :message and :request_status fields
       #
-      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
       def enrich_message_with_request_details(message)
         enriched = message.dup
 
@@ -152,16 +152,19 @@ module JsonRailsLogger
           enriched[:request_status] = 'completed' if enriched[:request_status].nil?
         end
 
-        # Add request time to the message if present and not already included
+        # Add request time to the message if present and not already included.
+        # request_time arrives via Lograge in milliseconds as a numeric value.
+        # We append a human-readable ms figure to the message, then store the
+        # value in seconds as a Float to satisfy the logging standard which
+        # requires request_time to be a floating-point number (not a string).
         if enriched[:request_time].present? && enriched[:message].present? && !enriched[:message].include?(', time taken:') # rubocop:disable Layout/LineLength
           enriched[:message] += format(', time taken: %.0f ms', enriched[:request_time])
-          seconds, milliseconds = enriched[:request_time].to_i.divmod(1000)
-          enriched[:request_time] = format('%.0f.%03d', seconds, milliseconds) # rubocop:disable Style/FormatStringToken
+          enriched[:request_time] = (enriched[:request_time] / 1000.0).round(3)
         end
 
         enriched
       end
-      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       # Applies recursive key filtering to the payload based on configuration.
       #
@@ -270,13 +273,14 @@ module JsonRailsLogger
       def reorder_payload(payload)
         reordered = {
           ts: payload[:ts],
-          level: payload[:level],
-          message: payload[:message]
+          level: payload[:level]
         }
-
+        reordered[:message] = payload[:message] unless payload[:message].nil?
+        # Place all other keys after ts, level, and message if not nil sorted
+        # alphabetically, except :_filtered which is kept at the end
         rest = payload.except(:ts, :level, :message, :_filtered).sort.to_h
         filtered = payload.key?(:_filtered) ? { _filtered: payload[:_filtered] } : {}
-
+        # Merge the reordered keys with the remaining keys and the filtered keys at the end
         reordered.merge(rest).merge(filtered)
       end
 

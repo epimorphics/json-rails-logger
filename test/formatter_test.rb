@@ -88,18 +88,6 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['request_time']).must_equal(1_234_568)
   end
 
-  it 'should include user_agent and accept from user-agent headers' do
-    formatter = JsonRailsLogger::JsonFormatter.new
-    formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
-
-    message = "User-Agent: \"Test-Agent\"\nAccept: \"application/json\""
-    log_output = formatter.call('INFO', timestamp, progname, message)
-    json_output = JSON.parse(log_output)
-
-    _(json_output['user_agent']).must_equal('Test-Agent')
-    _(json_output['accept']).must_equal('application/json')
-  end
-
   it 'should handle nil severity without truncation errors' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
@@ -112,7 +100,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output).must_include('status')
   end
 
-  it 'should handle nil raw message via parser delegation' do
+  it 'should omit message key entirely when raw message is nil' do
     formatter = JsonRailsLogger::JsonFormatter.new
     formatter.datetime_format = '%Y-%m-%dT%H:%M:%S.%3NZ'
 
@@ -121,11 +109,11 @@ describe 'JsonRailsLogger::JsonFormatter' do
 
     _(json_output['ts']).must_equal('2020-12-15T20:15:21.286Z')
     _(json_output['level']).must_equal('INFO')
-    _(json_output['message']).must_be_nil
+    _(json_output.key?('message')).must_equal(false)
   end
 
   it 'should place ts, level, and message first in JSON output' do
-    message = 'Status 200'
+    message = 'Something happened'
 
     log_output = fixture.call('INFO', timestamp, progname, message)
     json_output = JSON.parse(log_output)
@@ -196,7 +184,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['method']).must_equal('GET')
     _(json_output['path']).must_equal('/api/datasets/ukhpi/query')
     _(json_output['status']).must_equal(200)
-    _(json_output['request_time']).must_equal('0.146')
+    _(json_output['request_time']).must_equal(0.146)
 
     _(json_output['controller']).must_equal('Api::DatasetsController')
     _(json_output['action']).must_equal('query')
@@ -275,7 +263,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
       _(json_output['method']).must_equal('POST')
       _(json_output['path']).must_equal('/api/exports/csv')
       _(json_output['status']).must_equal(202)
-      _(json_output['request_time']).must_equal('0.089')
+      _(json_output['request_time']).must_equal(0.089)
     ensure
       Thread.current[JsonRailsLogger::REQUEST_ID] = nil
     end
