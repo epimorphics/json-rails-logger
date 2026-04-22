@@ -1,6 +1,15 @@
 name: Unit Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      # Add your branch naming conventions here, e.g. 'feature/**', 'fix/**'
+      # Restricting push to specific branches prevents duplicate runs when a PR
+      # is open — without this, both push and pull_request fire on every commit.
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
