@@ -196,7 +196,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
     _(json_output['method']).must_equal('GET')
     _(json_output['path']).must_equal('/api/datasets/ukhpi/query')
     _(json_output['status']).must_equal(200)
-    _(json_output['request_time']).must_equal('0.146')
+    _(json_output['request_time']).must_equal(0.146)
 
     _(json_output['controller']).must_equal('Api::DatasetsController')
     _(json_output['action']).must_equal('query')
@@ -275,7 +275,7 @@ describe 'JsonRailsLogger::JsonFormatter' do
       _(json_output['method']).must_equal('POST')
       _(json_output['path']).must_equal('/api/exports/csv')
       _(json_output['status']).must_equal(202)
-      _(json_output['request_time']).must_equal('0.089')
+      _(json_output['request_time']).must_equal(0.089)
     ensure
       Thread.current[JsonRailsLogger::REQUEST_ID] = nil
     end
