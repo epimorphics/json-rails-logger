@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - main
-      # Add your branch naming conventions here, e.g. 'feature/**', 'fix/**'
       # Restricting push to specific branches prevents duplicate runs when a PR
-      # is open — without this, both push and pull_request fire on every commit.
+      # is open - without this, both push and pull_request fire on every commit.
   pull_request:
     branches:
       - main
@@ -36,5 +35,8 @@ jobs:
         run: bundle install
 
       - name: Run checks
-        run: |
-          PAT=${{ secrets.EPI_GPR_READ_ACCESS_TOKEN }} make lint test
+        # Passing the token via env rather than interpolating it directly into
+        # the run string prevents it from appearing in logs or process listings.
+        env:
+          PAT: ${{ secrets.EPI_GPR_READ_ACCESS_TOKEN }}
+        run: make lint test
