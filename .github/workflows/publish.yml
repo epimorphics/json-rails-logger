@@ -36,7 +36,7 @@ jobs:
         make tags                             | tee -a $GITHUB_OUTPUT
 
     - name: "Build gem"
-      run: "make gem"
+      run: make gem
 
     - name: "Create Release"
       id: release
