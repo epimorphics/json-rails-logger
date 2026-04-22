@@ -1,17 +1,32 @@
 name: Release and Publish Gem
+
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 #---- Below this line should not require editing ----
 jobs:
   build:
     name: "Build gem package"
     runs-on: ubuntu-latest
+    # Prevent accidental releases from feature branches
+    if: github.ref == 'refs/heads/main'
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
+
+    - name: "Record desired ruby version"
+      id: ruby
+      shell: bash
+      run: |
+        [ -f .ruby-version ] && echo version=$(cat .ruby-version) | tee -a $GITHUB_OUTPUT || echo "version=" >> $GITHUB_OUTPUT
+
+    - name: "Setup ruby"
+      if: steps.ruby.outputs.version != ''
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ steps.ruby.outputs.version }}
 
     - name: "Git Information"
       id: gitinfo
