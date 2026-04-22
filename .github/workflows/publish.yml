@@ -53,5 +53,8 @@ jobs:
           json_rails_logger-${{ steps.gitinfo.outputs.version }}.gem
 
     - name: "Publish gem"
-      run: |
-        PAT=${{ secrets.GITHUB_TOKEN }} make publish
+      # Passing the token via env rather than interpolating it directly into
+      # the run string prevents it from appearing in logs or process listings.
+      env:
+        PAT: ${{ secrets.GITHUB_TOKEN }}
+      run: make publish
