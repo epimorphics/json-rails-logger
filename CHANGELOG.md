@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and severity levels moved to the top. Real log examples, a common fields
   table, Puma configuration guidance, and version requirements added. The
   upgrading section correctly distinguishes v2.x from v2.3.0 changes.
+- Renamed `NAME` to `GEM_NAME` in Makefile to eliminate conflicts with reserved
+  environment variables in Windows Subsystem for Linux
 
 ## [3.0.0] - 2026-03
 
