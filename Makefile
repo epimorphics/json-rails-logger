@@ -1,17 +1,17 @@
 .PHONY: all auth build bundles check checks clean coverage docs forceclean gem help lint publish realclean rubocop tag tags test updates vars version
 
-NAME?=json_rails_logger
+GEM_NAME?=json_rails_logger
 OWNER?=epimorphics
 COMMIT=$(shell git rev-parse --short HEAD)
-VERSION?=$(shell /usr/bin/env ruby -e 'require "./lib/${NAME}/version" ; puts JsonRailsLogger::VERSION')
+VERSION?=$(shell /usr/bin/env ruby -e 'require "./lib/${GEM_NAME}/version" ; puts JsonRailsLogger::VERSION')
 TAG?=${VERSION}-${COMMIT}
 PAT?=$(shell read -p 'Github access token:' TOKEN; echo $$TOKEN)
 BUNDLE?=bundle
 
 AUTH=${HOME}/.gem/credentials
-GEM=${NAME}-${VERSION}.gem
+GEM=${GEM_NAME}-${VERSION}.gem
 GPR=https://rubygems.pkg.github.com/${OWNER}
-SPEC=${NAME}.gemspec
+SPEC=${GEM_NAME}.gemspec
 
 ${AUTH}:
 	@mkdir -p ${HOME}/.gem
@@ -20,7 +20,7 @@ ${AUTH}:
 	@chmod 0600 ${AUTH}
 
 # Build the gem package
-${GEM}: ${SPEC} ./lib/${NAME}/version.rb
+${GEM}: ${SPEC} ./lib/${GEM_NAME}/version.rb
 	gem build ${SPEC}
 
 all: check ## Default target: run all checks
@@ -101,8 +101,8 @@ updates: ## Check for outdated Ruby gems with Bundler
 vars: ## Display current variable values
 	@echo "COMMIT          = ${COMMIT}"
 	@echo "GEM             = ${GEM}"
+	@echo "GEM_NAME        = ${GEM_NAME}"
 	@echo "GPR             = ${GPR}"
-	@echo "NAME            = ${NAME}"
 	@echo "OWNER           = ${OWNER}"
 	@echo "SPEC            = ${SPEC}"
 	@echo "TAG             = ${TAG}"
