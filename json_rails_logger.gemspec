@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version     = JsonRailsLogger::VERSION
   spec.summary     = 'JSON Rails Logger'
   spec.description = 'A custom rails log formatter that outputs JSON instead of raw text'
-  spec.authors     = ['Epimorphics Ltd', 'Bogdan-Adrian Marc']
+  spec.authors     = ['Epimorphics Ltd', 'Jon Humphrey', 'Bogdan-Adrian Marc']
   spec.email       = 'info@epimorphics.com'
   spec.homepage    = 'https://github.com/epimorphics/json-rails-logger'
   spec.license     = 'MIT'
