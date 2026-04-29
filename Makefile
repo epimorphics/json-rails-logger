@@ -88,6 +88,8 @@ tag: ## Display the current gem tag
 	@echo ${TAG}
 
 tags: ## Display version information for CI pipeline
+	@echo name=${GEM_NAME}
+	@echo owner=${OWNER}
 	@echo version=${VERSION}
 
 test: ## Run the test suite
