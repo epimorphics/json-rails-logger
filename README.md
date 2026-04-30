@@ -331,18 +331,18 @@ source "https://rubygems.pkg.github.com/epimorphics" do
 end
 ```
 
-And this to your environment config (e.g. `config/environments/production.rb`):
+And this to your environment config (for example
+`config/environments/production.rb`):
 
 ```ruby
 config.logger = JsonRailsLogger::Logger.new(STDOUT)
 ```
 
-## Internal Structure
+## Internal structure
 
-This logger makes use of [lograge](https://github.com/roidrage/lograge) to
-"attempt to tame Rails' default policy". We augment the JSON format used by
-Lograge to fit our local requirements and ensure the HTTP request ID is logged
-where available.
+This logger uses [lograge](https://github.com/roidrage/lograge) to replace
+Rails default output and augment JSON formatting for Epimorphics requirements,
+including request ID capture where available.
 
 ## Upgrading from v2.x
 
