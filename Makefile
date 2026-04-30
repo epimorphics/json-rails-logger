@@ -1,4 +1,4 @@
-.PHONY: all auth build bundles check checks clean coverage docs forceclean gem help lint publish realclean rubocop tag tags test updates vars version
+.PHONY: all assets auth build check checks clean coverage docs forceclean gem help lint publish realclean rubocop tag tags test updates vars version
 
 GEM_NAME?=json_rails_logger
 OWNER?=epimorphics
@@ -25,17 +25,16 @@ ${GEM}: ${SPEC} ./lib/${GEM_NAME}/version.rb
 
 all: check ## Default target: run all checks
 
+assets:
+	@echo "Installing assets for ${GEM_NAME} gem..."
+	@bundle install
+	@echo "Assets for ${GEM_NAME} gem are up to date."
+
 auth: ${AUTH} ## Set up authentication for GitHub and Bundler
 	@echo "Authentication set up for GitHub and Bundler."
 
-build: ## Build the gem
-	@echo "Building ${GEM} ..."
-	@${BUNDLE} exec gem build ${SPEC}
-	@echo "Done."
-
-bundles: ## Install Ruby gems via Bundler
-	@echo "Installing Ruby gems via Bundler..."
-	@${BUNDLE} install
+build: clean checks gem ## Verify and build the gem
+	@echo "Build and verification complete."
 
 check: checks ## Alias for checks target
 
@@ -44,6 +43,7 @@ checks: lint test ## Run all checks: linting and tests
 
 clean: ## Remove generated files
 	@echo "Cleaning up..."
+	@bundle exec rake clean clobber
 	@rm -rf coverage doc *.gem
 
 coverage: ## Display test coverage report
@@ -88,9 +88,11 @@ tag: ## Display the current gem tag
 	@echo ${TAG}
 
 tags: ## Display version information for CI pipeline
+	@echo name=${GEM_NAME}
+	@echo owner=${OWNER}
 	@echo version=${VERSION}
 
-test: ## Run the test suite
+test: assets ## Run the test suite
 	@echo "Running tests..."
 	@${BUNDLE} exec rake test
 

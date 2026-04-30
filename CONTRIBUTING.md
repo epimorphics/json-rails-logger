@@ -2,19 +2,19 @@
 
 This guide covers development workflow for the json-rails-logger gem.
 
-## Getting Started
+## Getting started
 
 After cloning the repository:
 
-### Install Dependencies
+### Install dependencies
 
 ```sh
-make bundles
+make assets
 ```
 
 This installs all required gems via Bundler.
 
-### GitHub Package Registry Authentication
+### GitHub Package Registry authentication
 
 This gem is published to the Epimorphics GitHub Package Registry. This allows us
 to publish and use Rubygems that we create in our own apps without publishing
@@ -50,9 +50,9 @@ make auth
 The same mechanism is used by the CI publication workflow, where the PAT is
 supplied automatically via `secrets.GITHUB_TOKEN`.
 
-## Development Workflow
+## Development workflow
 
-### `Makefile` Commands
+### `Makefile` commands
 
 The project includes a `Makefile` with common development tasks:
 
@@ -67,13 +67,13 @@ The project includes a `Makefile` with common development tasks:
 - `make test` — Run the test suite
 - `make updates` — Check for outdated Ruby gems
 
-## API Documentation
+## API documentation
 
 The gem includes comprehensive YARD documentation on all public methods:
 
 - **In your IDE**: Hover over `Logger.new` or `JsonFormatter.call` to see
   parameter types and usage examples
-- **As HTML docs**: Run `make doc` to generate human-readable API reference in
+- **As HTML docs**: Run `make docs` to generate human-readable API reference in
   `doc/index.html`
 
 The generated documentation includes method signatures with parameter types,
@@ -82,21 +82,23 @@ Rails and Ruby standard library components. Each public method is annotated with
 practical examples showing common configuration patterns and integration
 scenarios.
 
-## Publishing a New Version
+## Publishing a new version
 
 To publish a new version of the gem after a bugfix or feature addition:
 
-1. Ensure the version in `lib/json_rails_logger/version.rb` has been updated to
-   reflect the correct semver representing the change
-2. Update the `CHANGELOG.md` to document the new change
-3. `git tag` the new state with a tag that matches the new version
-4. Push the new tagged release to GitHub
+1. Update the version in `lib/json_rails_logger/version.rb` to reflect the
+   correct semver representing the change
+2. Update `CHANGELOG.md` to document the new change
+3. Run `make build` locally to verify linting and tests pass before releasing
+4. Merge the changes to `main`
+5. Trigger the **Release and Publish Gem** workflow manually via the GitHub
+   Actions UI — see the [workflows README](.github/workflows/README.md) for
+   full instructions
 
-Pushing a tagged version will automatically trigger the publish gem workflow,
-which should result in the gem appearing on the [list of
-releases](https://github.com/epimorphics/json-rails-logger/releases). If the
-workflow does not trigger or needs to be run manually, `make publish` will build
-and push the gem directly to the GitHub Package Registry.
+The workflow runs Rubocop and the test suite as parallel quality gates before
+publishing. The gem will appear on the [list of
+releases](https://github.com/epimorphics/json-rails-logger/releases) once
+complete.
 
 [^‡]: See [notes on the Epimorphics internal wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
 about creating a PAT.

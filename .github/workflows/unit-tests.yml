@@ -1,11 +1,16 @@
 name: Unit Tests
+# Restricting push to specific branches prevents duplicate runs when a PR
+# is open - without this, both push and pull_request fire on every commit.
 
 on:
+  workflow_call:
+    secrets:
+      EPI_GPR_READ_ACCESS_TOKEN:
+        required: true
+  workflow_dispatch:
   push:
     branches:
       - main
-      # Restricting push to specific branches prevents duplicate runs when a PR
-      # is open - without this, both push and pull_request fire on every commit.
   pull_request:
     branches:
       - main
@@ -32,11 +37,11 @@ jobs:
           ruby-version: ${{ steps.ruby.outputs.version }}
 
       - name: Install dependencies (bundle)
-        run: bundle install
+        run: make assets
 
       - name: Run checks
         # Passing the token via env rather than interpolating it directly into
         # the run string prevents it from appearing in logs or process listings.
         env:
           PAT: ${{ secrets.EPI_GPR_READ_ACCESS_TOKEN }}
-        run: make lint test
+        run: make checks
