@@ -1,33 +1,136 @@
 # JSON log formatter for Rails
 
+## 2am incident quick start
+
+If alarms are firing and you need to confirm whether logger behaviour is a
+contributor, use this path first:
+
+Makefile path:
+
+```sh
+make assets
+make lint
+make test
+```
+
+Direct targeted tests:
+
+```sh
+bundle exec rake test TEST=test/formatter_test.rb
+bundle exec rake test TEST=test/middleware_test.rb
+```
+
+### Known-good lifecycle sample
+
+Use this as a quick visual check for expected request progression under one
+`request_id`:
+
+```json
+{"ts":"1970-01-01T00:00:33.722Z","level":"INFO","message":"Received request for /","method":"GET","path":"/","request_id":"c5ff5ecb-0242-4359-88cb-652930d880f6","request_status":"received"}
+{"ts":"1970-01-01T00:00:34.884Z","level":"INFO","message":"Received response from API with 183 items, time taken: 1094 ms","method":"GET","path":"/catalog/data/dataset?_view=compact","query_string":"_view=compact","request_id":"c5ff5ecb-0242-4359-88cb-652930d880f6","request_status":"processing","request_time":1.094,"returned_rows":183,"status":200}
+{"ts":"1970-01-01T00:00:35.555Z","level":"INFO","message":"Datasets index request complete, time taken: 1779 ms","method":"GET","path":"/","request_id":"c5ff5ecb-0242-4359-88cb-652930d880f6","request_status":"completed","request_time":1.779,"status":200}
+```
+
+Expected outcome:
+
+- Linting exits cleanly
+- Test suite passes
+- Formatter tests confirm expected JSON structure and severity mapping
+- Middleware tests confirm request ID propagation and cleanup
+
+If these checks pass, the logger gem is less likely to be the primary source of
+an incident, and focus should move to consuming application logic, upstream
+services, or log transport and alerting configuration.
+
+## Is this gem likely the source?
+
+Likely:
+
+- Log lines are no longer valid single-line JSON
+- Expected fields such as `ts`, `level`, or `request_id` are missing
+- Severity values differ from documented mapping and alert thresholds
+- Request lifecycle correlation is broken for a single `request_id`
+
+Less likely:
+
+- Upstream service latency or 5xx rates changed, but log structure is stable
+- Consumer application business logic is failing with correctly formatted logs
+- Log shipper or indexing pipeline is down or dropping messages
+
+## Local verification path
+
+### Requirements
+
+- Ruby `>= 3.0.0`
+- Rails `>= 6.0` (via `railties`)
+- Bundler authenticated to the Epimorphics GitHub Package Registry
+
+See [GitHub Package Registry
+Authentication](CONTRIBUTING.md#github-package-registry-authentication) in
+CONTRIBUTING.md.
+
+### Verify in 5 minutes
+
+```sh
+make assets
+make check
+```
+
+`make check` runs both linting and tests.
+
+### Targeted behaviour checks
+
+```sh
+bundle exec rake test TEST=test/formatter_test.rb
+bundle exec rake test TEST=test/logger_test.rb
+bundle exec rake test TEST=test/middleware_test.rb
+```
+
+These tests give fast confidence in the core behaviours most likely to trigger
+logging alarms.
+
+### Consumer app smoke check
+
+In a Rails host application using this gem, issue one request and verify logs
+contain valid JSON entries with stable `request_id`, expected `request_status`
+transitions, and mapped `level` values.
+
+## Fast triage checklist
+
+1. Confirm the deployed logger gem version changed
+2. Validate consuming app still initialises `JsonRailsLogger::Logger`
+3. Confirm expected severity mapping still matches alerting rules
+4. Check `filtered_keys` changes did not remove alert-critical fields
+5. Verify Puma log formatting if startup logs must remain JSON
+
 ## Understanding json-rails-logger
 
 The json-rails-logger gem replaces Rails' default plain-text log formatter with
 one that serialises every log entry as a structured JSON object. Each entry
-carries predictable fields - timestamp, severity, HTTP method, request path,
-response status - making logs immediately queryable by aggregation tools such as
-Elasticsearch or Kibana without any custom parsing.
+carries predictable fields such as timestamp, severity, HTTP method, request
+path, and response status, making logs queryable by aggregation tools such as
+Elasticsearch or Kibana without custom parsing.
 
-The gem is designed for consistency across Epimorphics' application portfolio.
-All Rails applications using it produce logs in the same JSON structure with the
-same field names, which simplifies operations, monitoring, and cross-service
+The gem is designed for consistency across Epimorphics applications. Rails
+applications using it produce logs in the same JSON structure with the same
+field names, which simplifies operations, monitoring, and cross-service
 debugging.
 
 > [!TIP]
 > Use the outline icon (☰) at the top right of this page to jump directly to
 > any section.
 
-## Output Format
+## Output format
 
 Every log entry is a single-line JSON object. Fields are ordered with `ts`,
 `level`, and `message` first, followed by remaining fields alphabetically.
-Fields are only present when they carry a value - absent fields are omitted
-entirely rather than emitted as `null`.
+Fields are only present when they carry a value. Absent fields are omitted
+rather than emitted as `null`.
 
 ### Request lifecycle
 
 Each incoming HTTP request produces a sequence of log entries sharing a
-`request_id`. The `request_status` field tracks progress through the lifecycle:
+`request_id`. The `request_status` field tracks progress through the lifecycle.
 
 ```json
 {"ts":"1970-01-01T00:00:33.722Z","level":"INFO","message":"Received request for /","method":"GET","path":"/","request_id":"c5ff5ecb-0242-4359-88cb-652930d880f6","request_status":"received"}

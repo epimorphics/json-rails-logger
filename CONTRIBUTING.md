@@ -2,19 +2,19 @@
 
 This guide covers development workflow for the json-rails-logger gem.
 
-## Getting Started
+## Getting started
 
 After cloning the repository:
 
-### Install Dependencies
+### Install dependencies
 
 ```sh
-make bundles
+make assets
 ```
 
 This installs all required gems via Bundler.
 
-### GitHub Package Registry Authentication
+### GitHub Package Registry authentication
 
 This gem is published to the Epimorphics GitHub Package Registry. This allows us
 to publish and use Rubygems that we create in our own apps without publishing
@@ -50,9 +50,9 @@ make auth
 The same mechanism is used by the CI publication workflow, where the PAT is
 supplied automatically via `secrets.GITHUB_TOKEN`.
 
-## Development Workflow
+## Development workflow
 
-### `Makefile` Commands
+### `Makefile` commands
 
 The project includes a `Makefile` with common development tasks:
 
@@ -67,13 +67,13 @@ The project includes a `Makefile` with common development tasks:
 - `make test` — Run the test suite
 - `make updates` — Check for outdated Ruby gems
 
-## API Documentation
+## API documentation
 
 The gem includes comprehensive YARD documentation on all public methods:
 
 - **In your IDE**: Hover over `Logger.new` or `JsonFormatter.call` to see
   parameter types and usage examples
-- **As HTML docs**: Run `make doc` to generate human-readable API reference in
+- **As HTML docs**: Run `make docs` to generate human-readable API reference in
   `doc/index.html`
 
 The generated documentation includes method signatures with parameter types,
@@ -82,7 +82,7 @@ Rails and Ruby standard library components. Each public method is annotated with
 practical examples showing common configuration patterns and integration
 scenarios.
 
-## Publishing a New Version
+## Publishing a new version
 
 To publish a new version of the gem after a bugfix or feature addition:
 
