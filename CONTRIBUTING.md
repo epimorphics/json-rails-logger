@@ -86,17 +86,19 @@ scenarios.
 
 To publish a new version of the gem after a bugfix or feature addition:
 
-1. Ensure the version in `lib/json_rails_logger/version.rb` has been updated to
-   reflect the correct semver representing the change
-2. Update the `CHANGELOG.md` to document the new change
-3. `git tag` the new state with a tag that matches the new version
-4. Push the new tagged release to GitHub
+1. Update the version in `lib/json_rails_logger/version.rb` to reflect the
+   correct semver representing the change
+2. Update `CHANGELOG.md` to document the new change
+3. Run `make build` locally to verify linting and tests pass before releasing
+4. Merge the changes to `main`
+5. Trigger the **Release and Publish Gem** workflow manually via the GitHub
+   Actions UI — see the [workflows README](.github/workflows/README.md) for
+   full instructions
 
-Pushing a tagged version will automatically trigger the publish gem workflow,
-which should result in the gem appearing on the [list of
-releases](https://github.com/epimorphics/json-rails-logger/releases). If the
-workflow does not trigger or needs to be run manually, `make publish` will build
-and push the gem directly to the GitHub Package Registry.
+The workflow runs Rubocop and the test suite as parallel quality gates before
+publishing. The gem will appear on the [list of
+releases](https://github.com/epimorphics/json-rails-logger/releases) once
+complete.
 
 [^‡]: See [notes on the Epimorphics internal wiki](https://github.com/epimorphics/internal/wiki/Ansible-CICD#creating-a-pat-for-gpr-access)
 about creating a PAT.
