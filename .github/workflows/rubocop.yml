@@ -1,0 +1,30 @@
+name: Check Rubocop compliance
+
+# Restricting push to specific branches avoids duplicate runs when a PR
+# is open; manual dispatch supports ad hoc checks; workflow_call lets
+# publish.yml gate releases on lint passing.
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+
+    - name: Install dependencies (bundle)
+      run: make assets
+
+    - name: Run Rubocop
+      run: rubocop --format github
