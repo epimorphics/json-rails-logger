@@ -146,8 +146,7 @@ Each incoming HTTP request produces a sequence of log entries sharing a
 
 The `request_id` is the correlation thread across all entries for a single
 request, making it straightforward to trace a complete request lifecycle in a
-log aggregation tool. `query_string` appears only when a query string is
-present.
+log aggregation tool. `query_string` appears only when present.
 
 ### Common fields
 
