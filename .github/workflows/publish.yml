@@ -4,8 +4,15 @@ on:
   workflow_dispatch:
 
 jobs:
+  verify-code:
+    uses: ./.github/workflows/unit-tests.yml
+    secrets:
+      EPI_GPR_READ_ACCESS_TOKEN: ${{ secrets.EPI_GPR_READ_ACCESS_TOKEN }}
   publish:
-    uses: epimorphics/github-workflows/.github/workflows/publish-gem.yml@v1
+    needs: verify-code
+    # Tests always run; publishing is intentionally restricted to main.
+    # Dispatching from another branch lets you verify the gate without releasing.
     if: github.ref == 'refs/heads/main'
+    uses: epimorphics/github-workflows/.github/workflows/publish-gem.yml@v1
     secrets:
       packages_token: ${{ secrets.GITHUB_TOKEN }}
