@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.2] - 2026-04
-
 ### Changed
 
-- Refactored gem publishing workflow to call the shared reusable workflow
+- Adopted shared reusable workflow for gem publishing via GitHub Actions
+- Added Rubocop compliance as a required gate before publishing
+- Extended unit test and Rubocop workflows with manual dispatch and reusable call support
+- Scoped push and pull request triggers to the main branch to prevent duplicate CI runs
+- Standardised build flow to orchestrate verification, packaging, and cleaning as a single step
 - Extended Makefile `tags` target to expose gem name and owner for the CI pipeline
 - Updated rake dependency to the latest version
+- Documented Makefile target intent and the separation of verification, packaging, and publishing
+- Added GitHub Actions workflows README covering trigger behaviour and the release process
+- Restructured README for faster incident-response orientation with a front-loaded quick start, known-good lifecycle sample, triage checklist, and consumer app smoke check
+- Updated CONTRIBUTING to correct the setup command from `make bundles` to `make assets` and align all Makefile target references
 
 ## [3.0.1] - 2026-04
 
