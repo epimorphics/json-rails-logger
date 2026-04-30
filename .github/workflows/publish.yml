@@ -8,4 +8,4 @@ jobs:
     uses: epimorphics/github-workflows/.github/workflows/publish-gem.yml@v1
     if: github.ref == 'refs/heads/main'
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      packages_token: ${{ secrets.GITHUB_TOKEN }}
